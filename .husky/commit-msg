@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+node frontend/node_modules/@commitlint/cli/cli.js --config frontend/commitlint.config.mjs --edit "$1"

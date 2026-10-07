@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+echo "🚀 [pre-push] Menjalankan validasi sebelum push ke remote..."
+
+# 1. Validasi kepatuhan arbitrary px pada desktop breakpoint (lg, xl, 2xl)
+echo "🔍 [1/3] Validasi Tailwind viewport scaling (Rule A: desktop arbitrary px)..."
+node frontend/scripts/validate-viewport-classes.mjs || exit 1
+
+# 2. Linting
+echo "🔍 [2/3] Validasi ESLint..."
+(cd frontend && bun run lint) || exit 1
+
+# 3. Build verification
+echo "🔍 [3/3] Validasi Next.js build..."
+(cd frontend && bun run build) || exit 1
+
+echo "✅ [pre-push] Semua validasi berhasil! Melanjutkan proses push..."
