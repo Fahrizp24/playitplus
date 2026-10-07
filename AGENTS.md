@@ -2,6 +2,9 @@
 
 Dokumen ini berisi gambaran arsitektur, struktur repositori, standar alur kerja (workflow), serta aturan global untuk setiap AI Agent yang berkontribusi pada proyek **PlayItPlus**.
 
+> [!IMPORTANT]
+> Sebelum merencanakan atau mengimplementasikan perubahan, **wajib baca `KONSEP_PROYEK.md`** dan gunakan sebagai pedoman utama kebutuhan, ruang lingkup, batasan, serta alur sistem. Jika instruksi teknis bertentangan dengan konsep proyek, minta klarifikasi sebelum melanjutkan.
+
 ---
 
 ## 1. Status Proyek Saat Ini
