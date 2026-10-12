@@ -1,69 +1,174 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Header } from "./components/Header";
+import { PipelineStepTracker, type PipelineStep } from "./components/PipelineStepTracker";
+import { AudioInputSection } from "./components/AudioInputSection";
+import { TranscriptAndPrivacyPanel } from "./components/TranscriptAndPrivacyPanel";
+import { SoapWorkspacePanel } from "./components/SoapWorkspacePanel";
+import {
+  getProviderStatus,
+  getConsultationSamples,
+  processConsultationAudio,
+  processConsultationText,
+} from "@/lib/api";
+import type { DeidentificationResult, ProviderStatus, SOAPData } from "@/lib/types";
 
 export default function Home() {
+  const [providerStatus, setProviderStatus] = useState<ProviderStatus | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentStep, setCurrentStep] = useState<PipelineStep | null>(null);
+  const [completedSteps, setCompletedSteps] = useState<PipelineStep[]>([]);
+
+  const [transcript, setTranscript] = useState<string>("");
+  const [deidentification, setDeidentification] = useState<DeidentificationResult | null>(null);
+  const [soapData, setSoapData] = useState<SOAPData | null>(null);
+  const [highlightQuote, setHighlightQuote] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Ambil status provider saat aplikasi dimuat
+  useEffect(() => {
+    getProviderStatus()
+      .then((status) => setProviderStatus(status))
+      .catch((err) => {
+        console.warn("Backend belum menyala atau offline:", err);
+      });
+  }, []);
+
+  const handleProcessAudio = async (audioBlob: Blob, filename?: string) => {
+    try {
+      setIsProcessing(true);
+      setErrorMessage(null);
+      setCompletedSteps(["audio"]);
+      setCurrentStep("stt");
+
+      // Panggil backend full-pipeline
+      const result = await processConsultationAudio(audioBlob, filename);
+
+      setCurrentStep("deidentify");
+      setCompletedSteps(["audio", "stt"]);
+
+      setCurrentStep("autofill");
+      setCompletedSteps(["audio", "stt", "deidentify"]);
+
+      // Simpan seluruh data state
+      setTranscript(result.stt.transcript);
+      setDeidentification(result.deidentification);
+      setSoapData(result.soap);
+
+      setCompletedSteps(["audio", "stt", "deidentify", "autofill"]);
+      setCurrentStep(null);
+    } catch (err) {
+      console.error("Gagal memproses audio:", err);
+      const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat memproses audio.";
+      setErrorMessage(msg);
+      setCurrentStep(null);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUseSampleText = async () => {
+    try {
+      setIsProcessing(true);
+      setErrorMessage(null);
+      setCurrentStep("stt");
+      setCompletedSteps(["audio"]);
+
+      // Ambil sample dari backend atau langsung fallback text
+      const samplesRes = await getConsultationSamples().catch(() => null);
+      const sampleText = samplesRes?.samples?.[0]?.text || "";
+
+      const result = await processConsultationText(sampleText);
+
+      setCurrentStep("deidentify");
+      setCompletedSteps(["audio", "stt"]);
+
+      setCurrentStep("autofill");
+      setCompletedSteps(["audio", "stt", "deidentify"]);
+
+      setTranscript(result.stt.transcript);
+      setDeidentification(result.deidentification);
+      setSoapData(result.soap);
+
+      setCompletedSteps(["audio", "stt", "deidentify", "autofill"]);
+      setCurrentStep(null);
+    } catch (err) {
+      console.error("Gagal memproses sample:", err);
+      const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat memproses sample klinis.";
+      setErrorMessage(msg);
+      setCurrentStep(null);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSelectQuote = (quote: string) => {
+    if (highlightQuote === quote) {
+      setHighlightQuote(null);
+    } else {
+      setHighlightQuote(quote);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-zinc-100/70 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50 flex flex-col">
+      <Header providerStatus={providerStatus} />
+
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5 lg:px-[32px] lg:py-[24px] lg:gap-[24px]">
+        {/* Error notification banner */}
+        {errorMessage && (
+          <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 text-red-900 border border-red-200 text-xs dark:bg-red-950/50 dark:text-red-200 dark:border-red-900 lg:p-[16px] lg:text-[13px] lg:rounded-[12px]">
+            <span>{errorMessage}</span>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="font-bold underline ml-2 lg:ml-[8px]"
+            >
+              Tutup
+            </button>
+          </div>
+        )}
+
+        {/* 1. Pipeline Step Tracker */}
+        <PipelineStepTracker
+          currentStep={currentStep}
+          isProcessing={isProcessing}
+          completedSteps={completedSteps}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+
+        {/* 2. Audio Input Section */}
+        <AudioInputSection
+          onProcessAudio={handleProcessAudio}
+          onUseSampleText={handleUseSampleText}
+          isProcessing={isProcessing}
+        />
+
+        {/* 3. Side-by-side or stacked panels: Transcript & Privacy + SOAP Workspace */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-[24px]">
+          {/* Left Column: STT & Deidentifikasi */}
+          <div className="lg:col-span-5 flex flex-col gap-5 lg:gap-[24px]">
+            <TranscriptAndPrivacyPanel
+              transcript={transcript}
+              deidentification={deidentification}
+              highlightQuote={highlightQuote}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          {/* Right Column: SOAP Clinical & Patient Summary Workspace */}
+          <div className="lg:col-span-7 flex flex-col gap-5 lg:gap-[24px]">
+            <SoapWorkspacePanel
+              soapData={soapData}
+              onSelectQuote={handleSelectQuote}
+              activeQuote={highlightQuote}
+            />
+          </div>
         </div>
       </main>
+
+      <footer className="w-full border-t border-zinc-200 py-4 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400 lg:py-[16px] lg:text-[12px]">
+        PlayItPlus MVP — Digitalisasi AI untuk Dokumentasi Konsultasi & Ringkasan Tindak Lanjut Pasien
+      </footer>
     </div>
   );
 }
