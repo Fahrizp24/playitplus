@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Card } from "@/components/ui/Card";
 
 export type PipelineStep = "audio" | "stt" | "deidentify" | "autofill";
 
@@ -43,7 +44,7 @@ export function PipelineStepTracker({
   ];
 
   return (
-    <div className="w-full bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800 lg:p-[20px] lg:rounded-[16px]">
+    <Card className="p-4 lg:p-[20px]">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-[16px]">
         {steps.map((step) => {
           const isDone = completedSteps.includes(step.id);
@@ -115,6 +116,6 @@ export function PipelineStepTracker({
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 }

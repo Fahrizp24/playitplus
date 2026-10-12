@@ -109,13 +109,14 @@ export interface ConsultationProcessResult {
 export interface ProviderStatus {
   stt: {
     configuredProvider: string;
-    hasGroqKey: boolean;
-    hasOpenAIKey: boolean;
+    hasKey?: boolean;
+    baseUrl?: string;
+    model?: string;
   };
   llm: {
     configuredProvider: string;
-    hasGeminiKey: boolean;
-    hasOpenAIKey: boolean;
-    hasGroqKey: boolean;
+    hasKey?: boolean;
+    baseUrl?: string;
+    model?: string;
   };
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 
 interface AudioInputSectionProps {
   onProcessAudio: (audioBlob: Blob, filename?: string) => Promise<void>;
@@ -24,7 +26,6 @@ export function AudioInputSection({
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Timer rekaman
   useEffect(() => {
     if (isRecording) {
       timerIntervalRef.current = setInterval(() => {
@@ -68,10 +69,8 @@ export function AudioInputSection({
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
 
-        // Hentikan seluruh stream tracks
         stream.getTracks().forEach((track) => track.stop());
 
-        // Langsung trigger pemrosesan pipeline
         await onProcessAudio(audioBlob, "rekaman-konsultasi.webm");
       };
 
@@ -104,7 +103,7 @@ export function AudioInputSection({
   };
 
   return (
-    <div className="w-full bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800 lg:p-[28px] lg:rounded-[16px]">
+    <Card className="p-5 lg:p-[28px]">
       <div className="flex flex-col gap-4 lg:gap-[20px]">
         {/* Section Heading */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-[12px]">
@@ -117,14 +116,15 @@ export function AudioInputSection({
             </p>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onUseSampleText}
             disabled={isProcessing || isRecording}
-            className="inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors disabled:opacity-50 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800 dark:hover:bg-blue-900/40 lg:px-[16px] lg:py-[10px] lg:text-[13px] lg:rounded-[10px] lg:gap-[8px]"
+            className="gap-2 lg:gap-[8px]"
           >
             <svg
-              className="w-4 h-4 lg:w-[16px] lg:h-[16px]"
+              className="w-4 h-4 text-blue-600 dark:text-blue-400 lg:w-[16px] lg:h-[16px]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -137,7 +137,7 @@ export function AudioInputSection({
               />
             </svg>
             Uji Coba Cepat (Sample Klinik)
-          </button>
+          </Button>
         </div>
 
         {/* Microphone Error Alert */}
@@ -184,13 +184,13 @@ export function AudioInputSection({
                   <span className="w-2.5 h-2.5 rounded-full bg-red-600 lg:w-[10px] lg:h-[10px]" />
                   Merekam: {formatTimer(recordingSeconds)}
                 </div>
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={stopRecording}
-                  className="px-5 py-2.5 text-xs font-bold rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 transition-colors dark:bg-white dark:text-zinc-900 lg:px-[22px] lg:py-[10px] lg:text-[13px] lg:rounded-[10px]"
                 >
                   Selesai & Proses Flow
-                </button>
+                </Button>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400 lg:text-[12px]">
                   Klik untuk menyelesaikan rekaman dan memulai transkripsi
                 </p>
@@ -255,6 +255,6 @@ export function AudioInputSection({
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

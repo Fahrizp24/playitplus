@@ -20,14 +20,15 @@ export const consultationRoutes = new Elysia({ prefix: "/api/consultation" })
     return {
       stt: {
         configuredProvider: config.stt.provider,
-        hasGroqKey: Boolean(config.stt.groqApiKey),
-        hasOpenAIKey: Boolean(config.stt.openaiApiKey),
+        hasKey: Boolean(config.stt.apiKey),
+        baseUrl: config.stt.baseUrl,
+        model: config.stt.model,
       },
       llm: {
         configuredProvider: config.llm.provider,
-        hasGeminiKey: Boolean(config.llm.geminiApiKey),
-        hasOpenAIKey: Boolean(config.llm.openaiApiKey),
-        hasGroqKey: Boolean(config.llm.groqApiKey),
+        hasKey: Boolean(config.llm.apiKey || config.llm.geminiApiKey),
+        baseUrl: config.llm.baseUrl,
+        model: config.llm.model,
       },
     };
   })

@@ -2,40 +2,80 @@ export interface AppConfig {
   port: number;
   corsOrigin: string;
   stt: {
-    provider: "mock" | "groq" | "openai";
-    groqApiKey: string;
-    openaiApiKey: string;
-    groqModel: string;
-    openaiModel: string;
+    provider: "unified" | "mock";
+    apiKey: string;
+    baseUrl: string;
+    model: string;
   };
   llm: {
-    provider: "mock" | "gemini" | "openai" | "groq";
+    provider: "unified" | "gemini" | "mock";
+    apiKey: string;
+    baseUrl: string;
+    model: string;
     geminiApiKey: string;
-    openaiApiKey: string;
-    groqApiKey: string;
     geminiModel: string;
-    openaiModel: string;
-    groqModel: string;
   };
 }
+
+// Deteksi fallback otomatis bila user mengisi GROQ_API_KEY / OPENAI_API_KEY sebelumnya
+const detectedLlmApiKey =
+  process.env.LLM_API_KEY ||
+  process.env.OPENROUTER_API_KEY ||
+  process.env.GROQ_API_KEY ||
+  process.env.OPENAI_API_KEY ||
+  "";
+
+const detectedLlmBaseUrl =
+  process.env.LLM_BASE_URL ||
+  (process.env.GROQ_API_KEY && !process.env.LLM_API_KEY
+    ? "https://api.groq.com/openai/v1"
+    : process.env.OPENAI_API_KEY && !process.env.LLM_API_KEY
+    ? "https://api.openai.com/v1"
+    : "https://openrouter.ai/api/v1");
+
+const detectedLlmModel =
+  process.env.LLM_MODEL ||
+  (process.env.GROQ_API_KEY && !process.env.LLM_API_KEY
+    ? "llama-3.3-70b-versatile"
+    : process.env.OPENAI_API_KEY && !process.env.LLM_API_KEY
+    ? "gpt-4o-mini"
+    : "anthropic/claude-3.5-sonnet");
+
+const detectedSttApiKey =
+  process.env.STT_API_KEY ||
+  process.env.GROQ_API_KEY ||
+  process.env.OPENAI_API_KEY ||
+  "";
+
+const detectedSttBaseUrl =
+  process.env.STT_BASE_URL ||
+  (process.env.GROQ_API_KEY && !process.env.STT_BASE_URL
+    ? "https://api.groq.com/openai/v1"
+    : process.env.OPENAI_API_KEY && !process.env.STT_BASE_URL
+    ? "https://api.openai.com/v1"
+    : "https://api.groq.com/openai/v1");
+
+const detectedSttModel =
+  process.env.STT_MODEL ||
+  (process.env.OPENAI_API_KEY && !process.env.GROQ_API_KEY
+    ? "whisper-1"
+    : "whisper-large-v3-turbo");
 
 export const config: AppConfig = {
   port: Number(process.env.PORT) || 3001,
   corsOrigin: process.env.CORS_ORIGIN || "http://localhost:3000",
   stt: {
-    provider: (process.env.STT_PROVIDER as any) || "mock",
-    groqApiKey: process.env.GROQ_API_KEY || "",
-    openaiApiKey: process.env.OPENAI_API_KEY || "",
-    groqModel: process.env.GROQ_STT_MODEL || "whisper-large-v3-turbo",
-    openaiModel: process.env.OPENAI_STT_MODEL || "whisper-1",
+    provider: (process.env.STT_PROVIDER as any) || (detectedSttApiKey ? "unified" : "mock"),
+    apiKey: detectedSttApiKey,
+    baseUrl: detectedSttBaseUrl,
+    model: detectedSttModel,
   },
   llm: {
-    provider: (process.env.LLM_PROVIDER as any) || "mock",
+    provider: (process.env.LLM_PROVIDER as any) || (detectedLlmApiKey ? "unified" : "mock"),
+    apiKey: detectedLlmApiKey,
+    baseUrl: detectedLlmBaseUrl,
+    model: detectedLlmModel,
     geminiApiKey: process.env.GEMINI_API_KEY || "",
-    openaiApiKey: process.env.OPENAI_API_KEY || "",
-    groqApiKey: process.env.GROQ_API_KEY || "",
     geminiModel: process.env.GEMINI_MODEL || "gemini-2.5-flash",
-    openaiModel: process.env.OPENAI_MODEL || "gpt-4o-mini",
-    groqModel: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
   },
 };

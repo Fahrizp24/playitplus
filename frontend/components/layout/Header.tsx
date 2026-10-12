@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { ProviderStatus } from "@/lib/types";
+import { Badge } from "@/components/ui/Badge";
 
 interface HeaderProps {
   providerStatus: ProviderStatus | null;
@@ -10,6 +11,7 @@ interface HeaderProps {
 export function Header({ providerStatus }: HeaderProps) {
   const sttProvider = providerStatus?.stt.configuredProvider || "mock";
   const llmProvider = providerStatus?.llm.configuredProvider || "mock";
+  const llmModel = providerStatus?.llm.model || "claude-3.5-sonnet";
 
   return (
     <header className="w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-50 dark:border-zinc-800 dark:bg-zinc-950/80">
@@ -24,9 +26,9 @@ export function Header({ providerStatus }: HeaderProps) {
               <h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 lg:text-[20px] lg:leading-[24px]">
                 PlayItPlus
               </h1>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800 lg:text-[12px] lg:px-[8px] lg:py-[2px] lg:rounded-[9999px]">
+              <Badge variant="primary" size="sm">
                 MVP Flow
-              </span>
+              </Badge>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 lg:text-[13px] lg:leading-[16px]">
               Audio &rarr; STT &rarr; Deidentifikasi Privasi &rarr; Auto-Fill SOAP
@@ -34,7 +36,7 @@ export function Header({ providerStatus }: HeaderProps) {
           </div>
         </div>
 
-        {/* Agnostic Provider Status Pills */}
+        {/* Unified / Agnostic Provider Status Pills */}
         <div className="flex items-center flex-wrap gap-2 text-xs lg:gap-[10px] lg:text-[12px]">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 lg:px-[12px] lg:py-[6px] lg:rounded-[8px] lg:gap-[6px]">
             <span className="w-2 h-2 rounded-full bg-emerald-500 lg:w-[8px] lg:h-[8px]" />
@@ -44,17 +46,20 @@ export function Header({ providerStatus }: HeaderProps) {
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 lg:px-[12px] lg:py-[6px] lg:rounded-[8px] lg:gap-[6px]">
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 lg:px-[12px] lg:py-[6px] lg:rounded-[8px] lg:gap-[6px]"
+            title={`Model: ${llmModel}`}
+          >
             <span className="w-2 h-2 rounded-full bg-blue-500 lg:w-[8px] lg:h-[8px]" />
             <span className="text-zinc-500 font-medium dark:text-zinc-400">LLM:</span>
-            <span className="font-semibold uppercase text-zinc-900 dark:text-zinc-100">
-              {llmProvider}
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+              {llmProvider === "unified" ? `Unified (${llmModel.split("/").pop()})` : llmProvider.toUpperCase()}
             </span>
           </div>
 
-          <span className="text-[11px] text-zinc-600 bg-zinc-50 border border-zinc-200 px-2 py-0.5 rounded dark:bg-zinc-900 dark:text-zinc-400 dark:border-zinc-800 lg:text-[11px] lg:px-[8px] lg:py-[2px]">
-            Agnostik Vendor
-          </span>
+          <Badge variant="neutral" size="sm">
+            Unified / OpenRouter Ready
+          </Badge>
         </div>
       </div>
     </header>

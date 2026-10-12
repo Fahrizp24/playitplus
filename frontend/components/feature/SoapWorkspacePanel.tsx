@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import type { SOAPData, TraceableQuote } from "@/lib/types";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 
 interface SoapWorkspacePanelProps {
   soapData: SOAPData | null;
@@ -20,7 +23,7 @@ export function SoapWorkspacePanel({
 
   if (!soapData) {
     return (
-      <div className="w-full bg-white border border-zinc-200 rounded-2xl p-6 text-center text-zinc-400 dark:bg-zinc-900/60 dark:border-zinc-800 lg:p-[32px] lg:rounded-[16px]">
+      <Card className="p-6 text-center text-zinc-400 lg:p-[32px]">
         <svg
           className="w-12 h-12 mx-auto mb-2 text-zinc-300 dark:text-zinc-700 lg:w-[48px] lg:h-[48px] lg:mb-[8px]"
           fill="none"
@@ -38,7 +41,7 @@ export function SoapWorkspacePanel({
         <p className="text-xs text-zinc-500 lg:text-[12px]">
           Hasil ekstraksi otomatis format rekam medis klinis & ringkasan pasien akan tampil di sini.
         </p>
-      </div>
+      </Card>
     );
   }
 
@@ -114,7 +117,7 @@ _Pesan ini merupakan ringkasan informasi konsultasi, bukan pengganti resep atau 
   };
 
   return (
-    <div className="w-full bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800 lg:p-[28px] lg:rounded-[16px]">
+    <Card className="p-5 lg:p-[28px]">
       <div className="flex flex-col gap-4 lg:gap-[20px]">
         {/* Top Header & Tab Navigation */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-zinc-200 dark:border-zinc-800 lg:gap-[16px] lg:pb-[14px]">
@@ -124,13 +127,13 @@ _Pesan ini merupakan ringkasan informasi konsultasi, bukan pengganti resep atau 
                 Tahap 4: Auto-Fill Rekam Medis (SOAP) & Ringkasan Pasien
               </h3>
               {isSignedOff ? (
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800 lg:text-[12px] lg:px-[10px] lg:py-[2px]">
+                <Badge variant="success" size="md">
                   ✓ Disahkan Dokter
-                </span>
+                </Badge>
               ) : (
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800 lg:text-[12px] lg:px-[10px] lg:py-[2px]">
+                <Badge variant="warning" size="md">
                   Draf AI (Menunggu Pengesahan)
-                </span>
+                </Badge>
               )}
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 lg:text-[13px]">
@@ -166,17 +169,14 @@ _Pesan ini merupakan ringkasan informasi konsultasi, bukan pengganti resep atau 
             </div>
 
             {/* Doctor Sign-off button */}
-            <button
+            <Button
               type="button"
+              variant={isSignedOff ? "outline" : "secondary"}
+              size="sm"
               onClick={() => setIsSignedOff(!isSignedOff)}
-              className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-colors lg:px-[14px] lg:py-[7px] lg:text-[12px] lg:rounded-[10px] ${
-                isSignedOff
-                  ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
-                  : "bg-zinc-900 text-white border-zinc-900 hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:border-white"
-              }`}
             >
               {isSignedOff ? "Batalkan Pengesahan" : "Sahkan Catatan"}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -213,15 +213,12 @@ _Pesan ini merupakan ringkasan informasi konsultasi, bukan pengganti resep atau 
                   </span>
                   Subjective (Anamnesis)
                 </h4>
-                <span
-                  className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                    subjective.allergies.status === "DISANGKAL"
-                      ? "bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-                      : "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300"
-                  } lg:text-[11px] lg:px-[8px] lg:py-[2px]`}
+                <Badge
+                  variant={subjective.allergies.status === "DISANGKAL" ? "neutral" : "danger"}
+                  size="sm"
                 >
                   Alergi: {subjective.allergies.status}
-                </span>
+                </Badge>
               </div>
 
               <div className="space-y-3 text-xs leading-relaxed text-zinc-700 dark:text-zinc-300 lg:space-y-[12px] lg:text-[13px] lg:leading-[20px]">
@@ -311,9 +308,9 @@ _Pesan ini merupakan ringkasan informasi konsultasi, bukan pengganti resep atau 
                   </span>
                   Assessment (Diagnosis Klinis)
                 </h4>
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800 lg:text-[11px] lg:px-[8px] lg:py-[2px]">
+                <Badge variant="primary" size="sm">
                   {assessment.clinicalCertainty}
-                </span>
+                </Badge>
               </div>
 
               <div className="space-y-3 text-xs leading-relaxed text-zinc-700 dark:text-zinc-300 lg:space-y-[12px] lg:text-[13px] lg:leading-[20px]">
@@ -403,16 +400,17 @@ _Pesan ini merupakan ringkasan informasi konsultasi, bukan pengganti resep atau 
                 </p>
               </div>
 
-              <button
+              <Button
                 type="button"
+                variant="success"
                 onClick={handleCopyWhatsApp}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 transition-colors lg:px-[14px] lg:py-[8px] lg:text-[12px] lg:rounded-[10px] lg:gap-[6px]"
+                className="gap-1.5 lg:gap-[6px]"
               >
                 <svg className="w-4 h-4 lg:w-[16px] lg:h-[16px]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z" />
                 </svg>
                 {copiedWA ? "Tersalin ke Clipboard!" : "Salin Pesan WhatsApp"}
-              </button>
+              </Button>
             </div>
 
             {/* WhatsApp Message Preview Box */}
@@ -472,6 +470,6 @@ _Pesan ini merupakan ringkasan informasi konsultasi, bukan pengganti resep atau 
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

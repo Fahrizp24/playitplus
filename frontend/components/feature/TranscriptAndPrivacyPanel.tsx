@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import type { DeidentificationResult } from "@/lib/types";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 
 interface TranscriptAndPrivacyPanelProps {
   transcript: string;
@@ -18,7 +20,7 @@ export function TranscriptAndPrivacyPanel({
 
   if (!transcript) {
     return (
-      <div className="w-full bg-white border border-zinc-200 rounded-2xl p-6 text-center text-zinc-400 dark:bg-zinc-900/60 dark:border-zinc-800 lg:p-[32px] lg:rounded-[16px]">
+      <Card className="p-6 text-center text-zinc-400 lg:p-[32px]">
         <svg
           className="w-12 h-12 mx-auto mb-2 text-zinc-300 dark:text-zinc-700 lg:w-[48px] lg:h-[48px] lg:mb-[8px]"
           fill="none"
@@ -36,7 +38,7 @@ export function TranscriptAndPrivacyPanel({
         <p className="text-xs text-zinc-500 lg:text-[12px]">
           Mulai rekam suara atau unggah berkas untuk melihat hasil STT dan deidentifikasi privasi.
         </p>
-      </div>
+      </Card>
     );
   }
 
@@ -45,7 +47,6 @@ export function TranscriptAndPrivacyPanel({
       ? deidentification.deidentifiedText
       : transcript;
 
-  // Helper untuk me-render teks dengan highlight kutipan aktif
   const renderHighlightedText = (text: string, quoteToHighlight: string | null) => {
     if (!quoteToHighlight || !text.includes(quoteToHighlight)) {
       return <span>{text}</span>;
@@ -69,7 +70,7 @@ export function TranscriptAndPrivacyPanel({
   };
 
   return (
-    <div className="w-full bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800 lg:p-[24px] lg:rounded-[16px]">
+    <Card className="p-5 lg:p-[24px]">
       <div className="flex flex-col gap-4 lg:gap-[18px]">
         {/* Header & Toggle Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 lg:gap-[14px]">
@@ -79,9 +80,9 @@ export function TranscriptAndPrivacyPanel({
                 Tahap 2 & 3: Transkripsi (STT) & Deidentifikasi Privasi
               </h3>
               {deidentification && (
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 lg:text-[11px] lg:px-[8px] lg:py-[2px]">
+                <Badge variant="success" size="sm">
                   {deidentification.metadata.totalRedacted} Entitas PII Disamarkan
-                </span>
+                </Badge>
               )}
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 lg:text-[13px]">
@@ -151,6 +152,6 @@ export function TranscriptAndPrivacyPanel({
           {renderHighlightedText(displayText, highlightQuote)}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
