@@ -11,8 +11,9 @@ Dokumen ini berisi gambaran arsitektur, struktur repositori, standar alur kerja 
 
 > [!NOTE]
 > **CATATAN STATUS AKTIF**:
-> Saat ini, inisialisasi dan konfigurasi teknis **baru dilakukan untuk bagian `frontend/`**.
-> Folder `backend/` dan `docs/` saat ini masih kosong / pending dan akan disetup pada fase berikutnya.
+> - `frontend/`: Aktif (Next.js 16, React 19, Tailwind v4, Bun).
+> - `backend/`: Aktif (Scaffold minimal Elysia, Bun — siap diimplementasikan).
+> - `docs/`: Aktif (Konsep proyek & jurnal riset klinis).
 
 ---
 
@@ -21,7 +22,7 @@ Dokumen ini berisi gambaran arsitektur, struktur repositori, standar alur kerja 
 ```
 playitplus/
 ├── .husky/              # Git hooks global (commit-msg, pre-push)
-├── backend/             # Service Backend (Status: Pending / Belum disetup)
+├── backend/             # Service Backend (Elysia, Bun)
 ├── docs/                # Dokumentasi proyek & arsitektur
 ├── frontend/            # Aplikasi Frontend (Next.js 16, React 19, Tailwind v4, Bun)
 │   ├── .agents/skills/  # Skill agent internal (postcss-px-viewport)
@@ -68,7 +69,7 @@ Sebelum kode di-push ke remote repository Git, hook `.husky/pre-push` secara oto
 Jika ada salah satu tahapan yang gagal, perintah `git push` akan **dibatalkan**.
 
 ### C. Package Manager
-- Untuk folder `frontend/`, gunakan selalu **`bun`** (bukan `npm` atau `yarn`).
+- Gunakan selalu **`bun`** (bukan `npm` atau `yarn`) untuk seluruh repositori (`frontend/` dan `backend/`).
 
 ---
 
@@ -77,8 +78,8 @@ Jika ada salah satu tahapan yang gagal, perintah `git push` akan **dibatalkan**.
 | Folder | Status | Panduan Agent |
 |---|---|---|
 | `frontend/` | **Aktif** | Baca [frontend/AGENTS.md](file:///D:/playitplus/frontend/AGENTS.md) sebelum mengubah atau membuat kode. Patuhi Rule A (arbitrary `[Npx]` pada breakpoint desktop `lg:`, `xl:`, `2xl:`). |
-| `backend/` | *Pending* | Belum ada kode. Jangan menambahkan dependensi atau file kecuali diminta secara spesifik oleh user. |
-| `docs/` | *Pending* | Dokumentasi pendukung proyek. |
+| `backend/` | **Aktif (Scaffold)** | Menggunakan Bun + Elysia (`src/index.ts`). Jalankan dengan `bun run dev`. |
+| `docs/` | **Aktif** | Dokumentasi pendukung proyek ([KONSEP_PROYEK.md](file:///D:/playitplus/docs/KONSEP_PROYEK.md) & jurnal). |
 
 ---
 

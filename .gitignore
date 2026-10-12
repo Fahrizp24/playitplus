@@ -2,3 +2,16 @@
 .DS_Store
 Thumbs.db
 *.log
+
+# Dependencies
+node_modules/
+bun.lockb
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
