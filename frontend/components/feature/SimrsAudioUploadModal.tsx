@@ -192,7 +192,7 @@ export function SimrsAudioUploadModal({
                   {presets[0]?.title || "Audio Simulasi 1"}
                 </h4>
                 <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed lg:text-[11px] lg:leading-[15px] lg:mt-[2px]">
-                  {presets[0]?.description || "Kasus Hipertensi & Diabetes Melitus (Ny. Siti Rahma)"}
+                  {presets[0]?.description || "Berkas Rekaman Audio 1 (preset-1.wav)"}
                 </p>
               </div>
             </button>
@@ -224,7 +224,7 @@ export function SimrsAudioUploadModal({
                   {presets[1]?.title || "Audio Simulasi 2"}
                 </h4>
                 <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed lg:text-[11px] lg:leading-[15px] lg:mt-[2px]">
-                  {presets[1]?.description || "Kasus GERD & Asam Lambung (Tn. Budi Santoso)"}
+                  {presets[1]?.description || "Berkas Rekaman Audio 2 (preset-2.wav)"}
                 </p>
               </div>
             </button>

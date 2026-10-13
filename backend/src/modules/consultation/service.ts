@@ -35,41 +35,44 @@ export class ConsultationService {
     };
   }
 
-  processPreset(presetId: string): {
-    id: string;
-    createdAt: string;
-    stt: {
-      providerUsed: string;
-      transcript: string;
-      rawTranscript: string;
-    };
-    deidentification: DeidentificationResult;
-    soap: SOAPData;
-  } {
-    const preset = DUMMY_AUDIO_PRESETS.find((p) => p.id === presetId);
-    if (!preset) {
-      throw new Error(`Preset suara dengan ID '${presetId}' tidak ditemukan.`);
+  async processPreset(presetId: string): Promise<ConsultationProcessResult> {
+    const bunGlobal = (globalThis as unknown as { Bun?: { file: (path: string) => any } }).Bun;
+    if (!bunGlobal) {
+      throw new Error("Runtime Bun tidak ditemukan untuk membaca berkas audio.");
     }
 
-    return {
-      id: `cons-${preset.id}-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      stt: {
-        providerUsed: "hf_space (MOSS-Transcribe-Diarize Preset)",
-        transcript: preset.result.transcript,
-        rawTranscript: preset.result.transcript,
-      },
-      deidentification: preset.result.deidentification,
-      soap: preset.result.soap,
-    };
+    const baseName = presetId.replace(/\.(wav|mp3|webm|m4a|ogg)$/i, "");
+    const possibleExtensions = [".wav", ".mp3", ".webm", ".m4a", ".ogg"];
+
+    let targetFile: any = null;
+    let actualFilename = `${baseName}.wav`;
+
+    for (const ext of possibleExtensions) {
+      const filePath = `src/assets/audio/${baseName}${ext}`;
+      const f = bunGlobal.file(filePath);
+      if (f && f.size > 0) {
+        targetFile = f;
+        actualFilename = `${baseName}${ext}`;
+        break;
+      }
+    }
+
+    if (!targetFile) {
+      throw new Error(
+        `Berkas audio untuk '${presetId}' tidak ditemukan di 'src/assets/audio/'. Pastikan berkas preset-1 atau preset-2 tersedia.`
+      );
+    }
+
+    // Jalankan pipeline AI ASLI: STT (ZeroGPU Whisper) -> Diarization -> Deidentifikasi -> LLM SOAP
+    return await this.processPipeline({
+      audio: targetFile,
+      filename: actualFilename,
+    });
   }
 
   getSamples(): ConsultationSamplesResponse {
     return {
-      samples: DUMMY_AUDIO_PRESETS.map((item) => ({
-        title: `${item.title} - ${item.description}`,
-        text: item.result.transcript,
-      })),
+      samples: [],
     };
   }
 

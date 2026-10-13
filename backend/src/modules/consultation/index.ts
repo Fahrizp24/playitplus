@@ -34,21 +34,22 @@ export const consultationController = new Elysia({ prefix: "/api/consultation" }
     }
   )
 
-  // 3. Proses preset suara simulasi langsung menghasilkan transkrip & SOAP
+  // 3. Proses preset suara simulasi langsung menghasilkan transkrip & SOAP via STT & LLM
   .post(
     "/presets/:id/process",
-    ({ params, set }) => {
+    async ({ params, set }) => {
       try {
-        return consultationService.processPreset(params.id);
+        return await consultationService.processPreset(params.id);
       } catch (err: any) {
-        set.status = 404;
-        return { error: err.message || "Preset suara tidak ditemukan." };
+        set.status = 500;
+        return { error: err.message || "Gagal memproses preset audio." };
       }
     },
     {
       response: {
         200: ConsultationProcessResultSchema,
         404: t.Object({ error: t.String() }),
+        500: t.Object({ error: t.String() }),
       },
     }
   )
