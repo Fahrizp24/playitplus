@@ -1,5 +1,9 @@
 import { deidentificationService } from "../../utils/deidentification";
-import { getLLMProvider, SOAP_JSON_SCHEMA_GUIDE } from "../../utils/llm";
+import {
+  DIARIZATION_SYSTEM_PROMPT,
+  getLLMProvider,
+  SOAP_JSON_SCHEMA_GUIDE,
+} from "../../utils/llm";
 import { getSTTProvider } from "../../utils/stt";
 import type {
   AudioMetadata,
@@ -16,19 +20,54 @@ export class ConsultationService {
     };
   }
 
+  async diarizeTranscript(rawText: string): Promise<string> {
+    if (!rawText || rawText.trim() === "") return rawText;
+
+    // Jika teks sudah memiliki format peran (Dokter/Pasien), gunakan langsung
+    if (/^(?:Dokter|Pasien|dr\.)\s*:/im.test(rawText)) {
+      return rawText;
+    }
+
+    try {
+      const llm = getLLMProvider();
+      const diarized = await llm.generateText(
+        `Berikut teks mentah transkripsi audio percakapan konsultasi:\n\n${rawText}`,
+        {
+          systemPrompt: DIARIZATION_SYSTEM_PROMPT,
+          temperature: 0.1,
+        }
+      );
+
+      const cleanDiarized = diarized
+        .replace(/```(?:markdown|text)?/gi, "")
+        .replace(/```/g, "")
+        .trim();
+
+      return cleanDiarized || rawText;
+    } catch (err) {
+      console.warn("[ConsultationService] Gagal diarize via LLM, menggunakan raw text:", err);
+      return rawText;
+    }
+  }
+
   async transcribeAudio(
     file: Blob,
-    filename: string = "recording.webm"
+    filename?: string
   ): Promise<{ text: string; durationSeconds?: number; provider: string }> {
+    const actualFilename = filename || (file as any).name || (file as any).filename;
+    if (!actualFilename) {
+      throw new Error("Nama berkas audio wajib disertakan.");
+    }
     const stt = getSTTProvider();
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const result = await stt.transcribe(buffer, file.type || "audio/webm", {
-      filename,
+      filename: actualFilename,
       language: "id",
     });
+    const diarized = await this.diarizeTranscript(result.text);
     return {
-      text: result.text,
+      text: diarized,
       durationSeconds: result.durationSeconds,
       provider: stt.name,
     };
@@ -56,11 +95,14 @@ export class ConsultationService {
     const stt = getSTTProvider();
     const llm = getLLMProvider();
 
-    let transcriptText = "";
+    let rawTranscriptText = "";
     let audioMeta: AudioMetadata | undefined = undefined;
 
     if (input.audio && input.audio instanceof Blob) {
-      const filename = input.filename || "recording.webm";
+      const filename = input.filename || (input.audio as any).name || (input.audio as any).filename;
+      if (!filename) {
+        throw new Error("Nama berkas audio wajib disertakan.");
+      }
       audioMeta = {
         filename,
         sizeBytes: input.audio.size,
@@ -72,20 +114,23 @@ export class ConsultationService {
         filename: audioMeta.filename,
         language: "id",
       });
-      transcriptText = sttResult.text;
+      rawTranscriptText = sttResult.text;
       audioMeta.durationSeconds = sttResult.durationSeconds;
     } else if (input.text && typeof input.text === "string" && input.text.trim() !== "") {
-      transcriptText = input.text;
+      rawTranscriptText = input.text;
     } else {
       throw new Error(
         "Wajib mengirimkan salah satu input: file 'audio' atau 'text' (tidak boleh kosong)."
       );
     }
 
-    // Deidentifikasi
-    const deidResult = deidentificationService.deidentify(transcriptText);
+    // 1. Speaker Diarization via LLM (menentukan aktor Dokter & Pasien dari konteks)
+    const diarizedTranscript = await this.diarizeTranscript(rawTranscriptText);
 
-    // Auto-fill SOAP
+    // 2. Deidentifikasi pada teks beraktor
+    const deidResult = deidentificationService.deidentify(diarizedTranscript);
+
+    // 3. Auto-fill SOAP
     const prompt = `Ekstrak percakapan konsultasi klinis berikut menjadi struktur SOAP medis terstandar:\n\n${deidResult.deidentifiedText}`;
     const soapData = await llm.generateJSON<SOAPData>(prompt, SOAP_JSON_SCHEMA_GUIDE);
 
@@ -95,7 +140,8 @@ export class ConsultationService {
       audioMetadata: audioMeta,
       stt: {
         providerUsed: stt.name,
-        transcript: transcriptText,
+        transcript: diarizedTranscript,
+        rawTranscript: rawTranscriptText,
         durationSeconds: audioMeta?.durationSeconds,
       },
       deidentification: deidResult,

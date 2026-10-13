@@ -48,6 +48,61 @@ export function TranscriptAndPrivacyPanel({
     );
   };
 
+  const renderDialogue = (text: string, quoteToHighlight: string | null) => {
+    const lines = text.split("\n").filter((line) => line.trim().length > 0);
+    const hasSpeakers = lines.some((line) => /^(?:Dokter|Pasien|Pendamping):\s*/i.test(line));
+
+    if (!hasSpeakers) {
+      return (
+        <div className="whitespace-pre-wrap">
+          {renderHighlightedText(text, quoteToHighlight)}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-2.5 lg:gap-[10px]">
+        {lines.map((line, idx) => {
+          const match = line.match(/^(Dokter|Pasien|Pendamping):\s*(.*)$/i);
+          if (match) {
+            const role = match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase();
+            const speech = match[2];
+            const isDoctor = role.toLowerCase() === "dokter";
+            const isPatient = role.toLowerCase() === "pasien";
+
+            return (
+              <div
+                key={idx}
+                className="flex items-start gap-2 p-2 rounded-lg bg-white/80 border border-slate-200/70 lg:p-[8px] lg:gap-[8px] lg:rounded-[6px]"
+              >
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 lg:px-[6px] lg:py-[2px] lg:text-[10px] lg:rounded-[4px] ${
+                    isDoctor
+                      ? "bg-blue-100 text-blue-700"
+                      : isPatient
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-purple-100 text-purple-800"
+                  }`}
+                >
+                  {role}
+                </span>
+                <div className="flex-1 leading-relaxed text-slate-800">
+                  {renderHighlightedText(speech, quoteToHighlight)}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div key={idx} className="leading-relaxed text-slate-800">
+              {renderHighlightedText(line, quoteToHighlight)}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const totalRedacted = deidentification?.metadata?.totalRedacted ?? 0;
 
   return (
@@ -94,8 +149,8 @@ export function TranscriptAndPrivacyPanel({
         </div>
 
         {/* Transcript Box */}
-        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 max-h-80 overflow-y-auto text-xs leading-relaxed text-slate-800 whitespace-pre-wrap lg:p-[16px] lg:max-h-[340px] lg:text-[13px] lg:leading-[20px] lg:rounded-[10px]">
-          {renderHighlightedText(displayText, highlightQuote)}
+        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 max-h-80 overflow-y-auto text-xs leading-relaxed text-slate-800 lg:p-[16px] lg:max-h-[340px] lg:text-[13px] lg:leading-[20px] lg:rounded-[10px]">
+          {renderDialogue(displayText, highlightQuote)}
         </div>
       </div>
     </Card>

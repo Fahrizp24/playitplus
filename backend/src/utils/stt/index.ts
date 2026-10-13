@@ -54,7 +54,10 @@ export class UnifiedSTTProvider implements STTProvider {
   ): Promise<STTTranscriptionResult> {
     const { apiKey, baseUrl, model } = this.getValidConfig();
 
-    const filename = options?.filename || "recording.webm";
+    const filename = options?.filename || (audioData instanceof File ? audioData.name : "");
+    if (!filename) {
+      throw new Error("Nama berkas audio (filename) wajib disertakan untuk STT.");
+    }
     const blob =
       audioData instanceof Blob
         ? audioData
