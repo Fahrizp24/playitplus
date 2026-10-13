@@ -32,7 +32,11 @@ export const consultationController = new Elysia({ prefix: "/api/consultation" }
           return { error: "Field 'audio' (file) wajib diisi." };
         }
 
-        const filename = (file as any).name || "recording.webm";
+        const filename = (file as any).name || (file as any).filename;
+        if (!filename) {
+          set.status = 400;
+          return { error: "Nama berkas audio wajib disertakan." };
+        }
         return await consultationService.transcribeAudio(file, filename);
       } catch (err: any) {
         set.status = 500;

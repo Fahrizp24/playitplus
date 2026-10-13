@@ -142,6 +142,7 @@ export const ConsultationProcessResultSchema = t.Object({
   stt: t.Object({
     providerUsed: t.String(),
     transcript: t.String(),
+    rawTranscript: t.Optional(t.String()),
     durationSeconds: t.Optional(t.Number()),
   }),
   deidentification: DeidentificationResultSchema,

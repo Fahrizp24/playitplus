@@ -4,6 +4,7 @@ import type { SOAPData } from "../../modules/consultation/model";
 export interface LLMGenerateOptions {
   temperature?: number;
   maxTokens?: number;
+  systemPrompt?: string;
 }
 
 export interface LLMProvider {
@@ -119,6 +120,29 @@ Struktur JSON yang diharapkan:
 
 
 
+export const DIARIZATION_SYSTEM_PROMPT = `
+Anda adalah asisten transkripsi medis profesional yang bertugas melakukan Speaker Diarization dan Role Attribution pada percakapan klinis dokter-pasien.
+
+TUGAS UTAMA:
+Terima teks percakapan mentah (hasil Speech-to-Text tanpa label), lalu pisahkan dan susun menjadi dialog terstruktur dengan label "Dokter:" dan "Pasien:".
+Jika terdapat anggota keluarga atau pendamping yang berbicara, gunakan label "Pendamping:".
+
+ATURAN KETAT:
+1. AKURASI KONTEN: Pertahankan setiap kata, makna medis, dan keluhan yang diucapkan. JANGAN menambahkan hal yang tidak diucapkan, dan JANGAN memotong substansi pembicaraan.
+2. PENGENALAN PERAN (ROLE ATTRIBUTION):
+   - "Dokter:": Menyapa pasien, menanyakan keluhan utama, menggali riwayat penyakit/alergi, memeriksa fisik, menyampaikan diagnosis, menjelaskan resep obat, memberi anjuran, dan menetapkan jadwal kontrol/tanda bahaya.
+   - "Pasien:": Menjawab pertanyaan, menceritakan gejala dan durasi sakit, mengeluhkan rasa nyeri, menyebutkan obat yang sempat diminum, atau mengonfirmasi instruksi dokter.
+3. FORMATTING:
+   - Setiap giliran bicara (speaker turn) WAJIB dimulai di baris baru dengan format "NamaRole: Kalimat".
+   - Rapikan tanda baca (titik, koma, tanda tanya) dan kapitalisasi agar menjadi percakapan klinis yang nyaman dibaca.
+   - Contoh format:
+     Dokter: Selamat siang, silakan duduk. Apa yang dikeluhkan hari ini?
+     Pasien: Siang dok, saya demam sudah tiga hari ini, tenggorokan juga sakit kalau menelan.
+     Dokter: Baik, apakah ada batuk atau pilek juga?
+
+Keluarkan HANYA teks dialog yang sudah berlabel tanpa kata pengantar, tanpa penjelasan, dan tanpa markdown fences.
+`.trim();
+
 export class OpenAICompatibleLLMProvider implements LLMProvider {
   constructor(
     public name: string,
@@ -146,8 +170,14 @@ export class OpenAICompatibleLLMProvider implements LLMProvider {
 
   async generateText(prompt: string, options?: LLMGenerateOptions): Promise<string> {
     const { apiKey, baseUrl, model } = this.getValidConfig();
+    const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
+    const endpoint = cleanBaseUrl.endsWith("/chat/completions")
+      ? cleanBaseUrl
+      : `${cleanBaseUrl}/chat/completions`;
 
-    const response = await fetch(`${baseUrl}/chat/completions`, {
+    const systemContent = options?.systemPrompt ?? CLINICAL_EXTRACTION_SYSTEM_PROMPT;
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -156,7 +186,7 @@ export class OpenAICompatibleLLMProvider implements LLMProvider {
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: CLINICAL_EXTRACTION_SYSTEM_PROMPT },
+          { role: "system", content: systemContent },
           { role: "user", content: prompt },
         ],
         temperature: options?.temperature ?? 0.2,
