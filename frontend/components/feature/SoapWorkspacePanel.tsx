@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 
 interface SoapWorkspacePanelProps {
   soapData: SOAPData | null;
+  isLoading?: boolean;
   onSelectQuote: (quote: string) => void;
   activeQuote: string | null;
   activeTab?: "soap" | "patientSummary";
@@ -31,6 +32,7 @@ function formatDisplayDate(val: unknown): string {
 
 export function SoapWorkspacePanel({
   soapData,
+  isLoading = false,
   onSelectQuote,
   activeQuote,
   activeTab: controlledTab,
@@ -47,6 +49,101 @@ export function SoapWorkspacePanel({
   const [copiedWA, setCopiedWA] = useState(false);
 
   if (!soapData) {
+    if (isLoading) {
+      return (
+        <Card className="p-5 lg:p-[20px]">
+          <div className="flex flex-col gap-4 lg:gap-[16px]">
+            {/* Skeleton Action Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-200 lg:pb-[12px] lg:gap-[12px]">
+              <div className="flex items-center gap-2 lg:gap-[8px]">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping lg:w-[10px] lg:h-[10px]" />
+                <span className="text-xs font-bold text-blue-700 animate-pulse lg:text-[13px]">
+                  AI Copilot sedang menyusun SOAP...
+                </span>
+              </div>
+              <div className="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 opacity-60 lg:p-[3px] lg:rounded-[8px]">
+                <div className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-slate-400 shadow-xs lg:px-[12px] lg:py-[5px] lg:text-[12px] lg:rounded-[6px]">
+                  Catatan SOAP
+                </div>
+                <div className="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 lg:px-[12px] lg:py-[5px] lg:text-[12px] lg:rounded-[6px]">
+                  Ringkasan Pasien
+                </div>
+              </div>
+            </div>
+
+            {/* Banner Proses */}
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50/80 border border-blue-200/70 text-xs text-blue-800 lg:p-[12px] lg:gap-[10px] lg:text-[12px] lg:rounded-[8px]">
+              <svg className="w-4 h-4 animate-spin text-blue-600 shrink-0 lg:w-[16px] lg:h-[16px]" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <div className="flex-1">
+                <p className="font-semibold text-blue-900">Transkrip berhasil dimuat. Sedang mengekstrak SOAP klinis...</p>
+                <p className="text-[11px] text-blue-700 mt-0.5 lg:text-[11px] lg:mt-[2px]">
+                  Menganalisis keluhan subjektif, tanda objektif, diagnosis ICD-10, dan perencanaan terapi obat.
+                </p>
+              </div>
+            </div>
+
+            {/* Skeleton Sections */}
+            <div className="flex flex-col gap-3.5 lg:gap-[14px]">
+              {/* 1. Subjektif */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col gap-2.5 lg:p-[14px] lg:rounded-[8px] lg:gap-[10px]">
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-28 bg-slate-200 rounded animate-pulse lg:h-[16px] lg:w-[110px] lg:rounded-[4px]" />
+                  <div className="h-3 w-16 bg-slate-200 rounded animate-pulse lg:h-[12px] lg:w-[64px] lg:rounded-[4px]" />
+                </div>
+                <div className="space-y-1.5 lg:space-y-[6px]">
+                  <div className="h-3 w-full bg-slate-200 rounded animate-pulse lg:h-[12px] lg:rounded-[4px]" />
+                  <div className="h-3 w-4/5 bg-slate-200 rounded animate-pulse lg:h-[12px] lg:rounded-[4px]" />
+                </div>
+              </div>
+
+              {/* 2. Objektif */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col gap-2.5 lg:p-[14px] lg:rounded-[8px] lg:gap-[10px]">
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-28 bg-slate-200 rounded animate-pulse lg:h-[16px] lg:w-[110px] lg:rounded-[4px]" />
+                  <div className="h-3 w-16 bg-slate-200 rounded animate-pulse lg:h-[12px] lg:w-[64px] lg:rounded-[4px]" />
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:gap-[8px]">
+                  <div className="h-8 bg-slate-200 rounded-lg animate-pulse lg:h-[32px] lg:rounded-[6px]" />
+                  <div className="h-8 bg-slate-200 rounded-lg animate-pulse lg:h-[32px] lg:rounded-[6px]" />
+                  <div className="h-8 bg-slate-200 rounded-lg animate-pulse lg:h-[32px] lg:rounded-[6px]" />
+                  <div className="h-8 bg-slate-200 rounded-lg animate-pulse lg:h-[32px] lg:rounded-[6px]" />
+                </div>
+              </div>
+
+              {/* 3. Asesmen */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col gap-2.5 lg:p-[14px] lg:rounded-[8px] lg:gap-[10px]">
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-32 bg-slate-200 rounded animate-pulse lg:h-[16px] lg:w-[128px] lg:rounded-[4px]" />
+                  <div className="h-3 w-20 bg-slate-200 rounded animate-pulse lg:h-[12px] lg:w-[80px] lg:rounded-[4px]" />
+                </div>
+                <div className="h-5 w-3/4 bg-slate-200 rounded animate-pulse lg:h-[20px] lg:rounded-[4px]" />
+              </div>
+
+              {/* 4. Planning */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col gap-2.5 lg:p-[14px] lg:rounded-[8px] lg:gap-[10px]">
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-28 bg-slate-200 rounded animate-pulse lg:h-[16px] lg:w-[110px] lg:rounded-[4px]" />
+                  <div className="h-3 w-20 bg-slate-200 rounded animate-pulse lg:h-[12px] lg:w-[80px] lg:rounded-[4px]" />
+                </div>
+                <div className="space-y-1.5 lg:space-y-[6px]">
+                  <div className="h-3 w-full bg-slate-200 rounded animate-pulse lg:h-[12px] lg:rounded-[4px]" />
+                  <div className="h-3 w-2/3 bg-slate-200 rounded animate-pulse lg:h-[12px] lg:rounded-[4px]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Skeleton Footer */}
+            <div className="pt-3 border-t border-slate-200 flex justify-end gap-3 lg:pt-[12px] lg:gap-[12px]">
+              <div className="h-9 w-24 bg-slate-200 rounded-lg animate-pulse lg:h-[36px] lg:w-[96px] lg:rounded-[6px]" />
+              <div className="h-9 w-32 bg-slate-200 rounded-lg animate-pulse lg:h-[36px] lg:w-[128px] lg:rounded-[6px]" />
+            </div>
+          </div>
+        </Card>
+      );
+    }
     return null;
   }
 

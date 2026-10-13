@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SimrsModuleGrid } from "@/components/feature/SimrsModuleGrid";
@@ -11,11 +11,11 @@ import { TranscriptAndPrivacyPanel } from "@/components/feature/TranscriptAndPri
 import { SoapWorkspacePanel } from "@/components/feature/SoapWorkspacePanel";
 import {
   getConsultationSamples,
-  processConsultationAudio,
-  processConsultationText,
+  transcribeConsultationAudio,
+  autofillConsultationSoap,
+  deidentifyText,
 } from "@/lib/api";
 import type {
-  ConsultationProcessResult,
   ConsultationSamplesResponse,
   DeidentificationResult,
   SOAPData,
@@ -42,6 +42,10 @@ export function ConsultationWorkspace({
   const [highlightQuote, setHighlightQuote] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Progressive Loading State
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isGeneratingSoap, setIsGeneratingSoap] = useState(false);
+
   // Tab & Modal State
   const [activeSoapTab, setActiveSoapTab] = useState<"soap" | "patientSummary">("soap");
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
@@ -55,61 +59,85 @@ export function ConsultationWorkspace({
     }, 100);
   };
 
-  const applyProcessResult = (result: ConsultationProcessResult) => {
-    setTranscript(result.stt.transcript);
-    setDeidentification(result.deidentification);
-    setSoapData(result.soap);
-    setErrorMessage(null);
-    scrollToWorkspace();
-  };
-
-  // TanStack Mutation: Proses Audio
-  const audioMutation = useMutation({
-    mutationFn: async ({ blob, filename }: { blob: Blob; filename: string }) => {
-      return await processConsultationAudio(blob, filename);
-    },
-    onSuccess: (data) => {
-      applyProcessResult(data);
-    },
-    onError: (err: Error) => {
-      console.error("Gagal memproses audio:", err);
-      setErrorMessage(err.message || "Gagal memproses berkas audio.");
-    },
-  });
-
-  // TanStack Mutation: Proses Teks Sampel
-  const textMutation = useMutation({
-    mutationFn: async (text: string) => {
-      return await processConsultationText(text);
-    },
-    onSuccess: (data) => {
-      applyProcessResult(data);
-    },
-    onError: (err: Error) => {
-      console.error("Gagal memproses simulasi sampel:", err);
-      setErrorMessage(err.message || "Gagal memproses simulasi kasus.");
-    },
-  });
-
-  const isProcessing = audioMutation.isPending || textMutation.isPending;
-  const processingStatusText = audioMutation.isPending
-    ? "Mentranskripsikan audio & mengekstrak catatan medis..."
-    : textMutation.isPending
-    ? "Mengekstrak catatan medis dari kasus simulasi..."
-    : "";
-
+  // 1. Alur Audio Bertahap: Transkrip -> Muncul Dulu -> Ekstraksi SOAP Muncul Belakangan
   const handleProcessAudio = async (audioBlob: Blob, filename: string) => {
-    audioMutation.mutate({ blob: audioBlob, filename });
+    setIsRecordModalOpen(false);
+    setErrorMessage(null);
+    setSoapData(null);
+    setHighlightQuote(null);
+    setIsTranscribing(true);
+    setIsGeneratingSoap(false);
+
+    try {
+      // TAHAP 1: Transkripsi Audio & Pengenalan Giliran Bicara (Dokter & Pasien)
+      const sttResult = await transcribeConsultationAudio(audioBlob, filename);
+      setTranscript(sttResult.text);
+      if (sttResult.deidentification) {
+        setDeidentification(sttResult.deidentification);
+      }
+      setIsTranscribing(false);
+
+      // Transkrip langsung tampil! Lembar kerja dibuka dan digulirkan
+      scrollToWorkspace();
+
+      // TAHAP 2: Ekstraksi Catatan Medis SOAP (Komponen SOAP menampilkan draf memuat)
+      setIsGeneratingSoap(true);
+      const textToExtract = sttResult.deidentification?.deidentifiedText || sttResult.text;
+      const soapResult = await autofillConsultationSoap(textToExtract);
+      setSoapData(soapResult.soap);
+    } catch (err: unknown) {
+      console.error("Gagal memproses alur konsultasi:", err);
+      const msg = err instanceof Error ? err.message : "Gagal memproses berkas audio.";
+      setErrorMessage(msg);
+    } finally {
+      setIsTranscribing(false);
+      setIsGeneratingSoap(false);
+    }
   };
 
+  // 2. Alur Teks Simulasi Kasus
   const handleRunSample = async () => {
     const sampleText = samplesData?.samples?.[0]?.text;
     if (!sampleText) {
-      setErrorMessage("Data dummy sampel telah dinonaktifkan di server. Silakan gunakan Rekam Suara atau Unggah Audio untuk menguji model AI secara langsung.");
+      setErrorMessage(
+        "Data sampel telah dinonaktifkan di server. Silakan gunakan Rekam Suara atau Unggah Audio untuk menguji model AI secara langsung."
+      );
       return;
     }
-    textMutation.mutate(sampleText);
+
+    setErrorMessage(null);
+    setSoapData(null);
+    setHighlightQuote(null);
+    setIsTranscribing(false);
+
+    // TAHAP 1: Transkrip teks sampel langsung tampil
+    setTranscript(sampleText);
+    scrollToWorkspace();
+
+    try {
+      // Deidentifikasi teks
+      const deid = await deidentifyText(sampleText);
+      setDeidentification(deid);
+
+      // TAHAP 2: Ekstraksi Catatan SOAP
+      setIsGeneratingSoap(true);
+      const soapResult = await autofillConsultationSoap(deid.deidentifiedText || sampleText);
+      setSoapData(soapResult.soap);
+    } catch (err: unknown) {
+      console.error("Gagal memproses simulasi sampel:", err);
+      const msg = err instanceof Error ? err.message : "Gagal memproses simulasi kasus.";
+      setErrorMessage(msg);
+    } finally {
+      setIsGeneratingSoap(false);
+    }
   };
+
+  const isProcessing = isTranscribing || isGeneratingSoap;
+  const processingStatusText = isTranscribing
+    ? "Tahap 1/2: Mentranskripsikan audio & mengenali pembicara..."
+    : isGeneratingSoap
+    ? "Tahap 2/2: AI Copilot sedang mengekstrak catatan SOAP medis & resep..."
+    : "";
 
   const handleSelectQuote = (quote: string) => {
     setHighlightQuote((prev) => (prev === quote ? null : quote));
@@ -121,9 +149,11 @@ export function ConsultationWorkspace({
     setSoapData(null);
     setHighlightQuote(null);
     setErrorMessage(null);
+    setIsTranscribing(false);
+    setIsGeneratingSoap(false);
   };
 
-  const hasConsultationData = Boolean(soapData || transcript);
+  const hasConsultationData = Boolean(transcript || isTranscribing || isGeneratingSoap || soapData);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 flex flex-col antialiased">
@@ -194,6 +224,7 @@ export function ConsultationWorkspace({
               <div className="lg:col-span-7 flex flex-col gap-4 lg:gap-[16px]">
                 <SoapWorkspacePanel
                   soapData={soapData}
+                  isLoading={isGeneratingSoap}
                   onSelectQuote={handleSelectQuote}
                   activeQuote={highlightQuote}
                   activeTab={activeSoapTab}
