@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import {
+  AudioPresetsResponseSchema,
   AutofillBodySchema,
   ConsultationProcessResultSchema,
   ConsultationQueueResponseSchema,
@@ -22,7 +23,51 @@ export const consultationController = new Elysia({ prefix: "/api/consultation" }
     }
   )
 
-  // 2. Dapatkan daftar sample percakapan klinis
+  // 2. Dapatkan daftar preset suara simulasi
+  .get(
+    "/presets",
+    () => {
+      return consultationService.getPresets();
+    },
+    {
+      response: AudioPresetsResponseSchema,
+    }
+  )
+
+  // 3. Proses preset suara simulasi langsung menghasilkan transkrip & SOAP
+  .post(
+    "/presets/:id/process",
+    ({ params, set }) => {
+      try {
+        return consultationService.processPreset(params.id);
+      } catch (err: any) {
+        set.status = 404;
+        return { error: err.message || "Preset suara tidak ditemukan." };
+      }
+    },
+    {
+      response: {
+        200: ConsultationProcessResultSchema,
+        404: t.Object({ error: t.String() }),
+      },
+    }
+  )
+
+  // 4. Unduh berkas audio preset
+  .get(
+    "/presets/:id/audio",
+    ({ params }) => {
+      const filename = params.id.endsWith(".wav") ? params.id : `${params.id}.wav`;
+      const filePath = `src/assets/audio/${filename}`;
+      const bunGlobal = (globalThis as unknown as { Bun?: { file: (path: string) => unknown } }).Bun;
+      if (bunGlobal) {
+        return bunGlobal.file(filePath);
+      }
+      return new Response("Not implemented", { status: 501 });
+    }
+  )
+
+  // 5. Dapatkan daftar sample percakapan klinis
   .get(
     "/samples",
     () => {

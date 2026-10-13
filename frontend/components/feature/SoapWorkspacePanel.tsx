@@ -354,7 +354,7 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
             {uncertainties && uncertainties.length > 0 && (
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 lg:p-[12px] lg:rounded-[10px]">
                 <strong className="block mb-1 lg:mb-[4px]">Perlu Konfirmasi Dokter:</strong>
-                {uncertainties.map((u, i: number) => (
+                {uncertainties.map((u: { issue: string; reason: string; suggestedAction: string }, i: number) => (
                   <p key={i}>• {u.issue} ({u.reason}): {u.suggestedAction}</p>
                 ))}
               </div>

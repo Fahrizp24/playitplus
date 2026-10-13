@@ -5,9 +5,10 @@ import {
   SOAP_JSON_SCHEMA_GUIDE,
 } from "../../utils/llm";
 import { getSTTProvider } from "../../utils/stt";
-import { DUMMY_CONSULTATION_QUEUE } from "./dummy-queue";
+import { DUMMY_AUDIO_PRESETS, DUMMY_CONSULTATION_QUEUE } from "./dummy-queue";
 import type {
   AudioMetadata,
+  AudioPresetsResponse,
   ConsultationProcessResult,
   ConsultationQueueResponse,
   ConsultationSamplesResponse,
@@ -22,11 +23,52 @@ export class ConsultationService {
     };
   }
 
+  getPresets(): AudioPresetsResponse {
+    return {
+      presets: DUMMY_AUDIO_PRESETS.map((p) => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        durationLabel: p.durationLabel,
+        filename: p.filename,
+      })),
+    };
+  }
+
+  processPreset(presetId: string): {
+    id: string;
+    createdAt: string;
+    stt: {
+      providerUsed: string;
+      transcript: string;
+      rawTranscript: string;
+    };
+    deidentification: DeidentificationResult;
+    soap: SOAPData;
+  } {
+    const preset = DUMMY_AUDIO_PRESETS.find((p) => p.id === presetId);
+    if (!preset) {
+      throw new Error(`Preset suara dengan ID '${presetId}' tidak ditemukan.`);
+    }
+
+    return {
+      id: `cons-${preset.id}-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      stt: {
+        providerUsed: "hf_space (MOSS-Transcribe-Diarize Preset)",
+        transcript: preset.result.transcript,
+        rawTranscript: preset.result.transcript,
+      },
+      deidentification: preset.result.deidentification,
+      soap: preset.result.soap,
+    };
+  }
+
   getSamples(): ConsultationSamplesResponse {
     return {
-      samples: DUMMY_CONSULTATION_QUEUE.map((item) => ({
-        title: `${item.queueNumber} - ${item.patientName} (${item.clinicService})`,
-        text: item.transcript,
+      samples: DUMMY_AUDIO_PRESETS.map((item) => ({
+        title: `${item.title} - ${item.description}`,
+        text: item.result.transcript,
       })),
     };
   }

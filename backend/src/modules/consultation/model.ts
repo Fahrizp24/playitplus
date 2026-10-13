@@ -190,9 +190,9 @@ export const ConsultationQueueItemSchema = t.Object({
   chiefComplaint: t.String(),
   status: t.String(),
   estimatedTime: t.String(),
-  transcript: t.String(),
-  deidentification: DeidentificationResultSchema,
-  soap: SOAPDataSchema,
+  transcript: t.Optional(t.Nullable(t.String())),
+  deidentification: t.Optional(t.Nullable(DeidentificationResultSchema)),
+  soap: t.Optional(t.Nullable(SOAPDataSchema)),
 });
 
 export type ConsultationQueueItem = Static<typeof ConsultationQueueItemSchema>;
@@ -202,4 +202,21 @@ export const ConsultationQueueResponseSchema = t.Object({
 });
 
 export type ConsultationQueueResponse = Static<typeof ConsultationQueueResponseSchema>;
+
+export const AudioPresetItemSchema = t.Object({
+  id: t.String(),
+  title: t.String(),
+  description: t.String(),
+  durationLabel: t.String(),
+  filename: t.String(),
+});
+
+export type AudioPresetItem = Static<typeof AudioPresetItemSchema>;
+
+export const AudioPresetsResponseSchema = t.Object({
+  presets: t.Array(AudioPresetItemSchema),
+});
+
+export type AudioPresetsResponse = Static<typeof AudioPresetsResponseSchema>;
+
 

@@ -1,5 +1,7 @@
 import { eden } from "./eden";
+import { envConfig } from "../config";
 import type {
+  AudioPresetsResponse,
   ConsultationProcessResult,
   ConsultationQueueResponse,
   ConsultationSamplesResponse,
@@ -20,7 +22,7 @@ function extractErrorMessage(errorValue: unknown, defaultMessage: string): strin
 }
 
 /**
- * Mengambil daftar antrean pasien klinis lengkap dengan transkrip & ringkasan dari BE.
+ * Mengambil daftar antrean pasien klinis lengkap dari BE.
  */
 export async function getConsultationQueue(): Promise<ConsultationQueueResponse> {
   const { data, error } = await eden.api.consultation.queue.get();
@@ -30,6 +32,41 @@ export async function getConsultationQueue(): Promise<ConsultationQueueResponse>
     );
   }
   return data;
+}
+
+/**
+ * Mengambil daftar berkas suara simulasi klinis yang siap dijalankan dari BE.
+ */
+export async function getAudioPresets(): Promise<AudioPresetsResponse> {
+  const { data, error } = await eden.api.consultation.presets.get();
+  if (error) {
+    throw new Error(
+      extractErrorMessage(error.value, "Gagal mengambil daftar suara simulasi.")
+    );
+  }
+  return data;
+}
+
+/**
+ * Memproses preset suara simulasi klinis langsung menghasilkan transkrip & SOAP.
+ */
+export async function processAudioPreset(
+  presetId: string
+): Promise<ConsultationProcessResult> {
+  const { data, error } = await eden.api.consultation.presets({ id: presetId }).process.post();
+  if (error) {
+    throw new Error(
+      extractErrorMessage(error.value, "Gagal memproses simulasi suara.")
+    );
+  }
+  return data as ConsultationProcessResult;
+}
+
+/**
+ * Mendapatkan URL streaming audio dari preset tertentu.
+ */
+export function getAudioPresetUrl(presetId: string): string {
+  return `${envConfig.apiBaseUrl}/api/consultation/presets/${presetId}/audio`;
 }
 
 /**

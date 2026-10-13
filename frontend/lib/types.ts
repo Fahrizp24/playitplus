@@ -18,6 +18,12 @@ export type ConsultationSamplesResponse = NonNullable<
 
 export type ConsultationSampleItem = ConsultationSamplesResponse["samples"][number];
 
+export type AudioPresetsResponse = NonNullable<
+  Awaited<ReturnType<typeof eden.api.consultation.presets.get>>["data"]
+>;
+
+export type AudioPresetItem = AudioPresetsResponse["presets"][number];
+
 export type ConsultationProcessResult = NonNullable<
   Awaited<ReturnType<typeof eden.api.consultation.process.post>>["data"]
 >;
