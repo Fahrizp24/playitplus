@@ -346,12 +346,17 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
                 <button
                   type="button"
                   onClick={() => handleSelectPatient(queue[0])}
-                  className="mt-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-2 lg:px-[16px] lg:py-[10px] lg:text-[13px] lg:rounded-[10px] lg:gap-[8px]"
+                  className="group relative inline-block mt-2 cursor-pointer focus:outline-hidden"
                 >
-                  <span>Mulai Konsultasi Pasien Pertama ({queue[0].queueNumber})</span>
-                  <svg className="w-4 h-4 lg:w-[16px] lg:h-[16px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
+                  {/* Layer Dasar 3D */}
+                  <span className="absolute inset-0 w-full h-full rounded-xl bg-blue-800 translate-y-1 transition-transform group-hover:translate-y-1.5 group-active:translate-y-0 lg:rounded-[10px]" />
+                  {/* Layer Muka Tombol 3D */}
+                  <span className="relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 group-hover:bg-blue-500 text-white font-bold text-xs border-t border-blue-400/40 shadow-xs transition-transform transform -translate-y-0.5 group-hover:-translate-y-1 group-active:translate-y-1 lg:px-[16px] lg:py-[10px] lg:text-[13px] lg:rounded-[10px] lg:gap-[8px]">
+                    <span>Mulai Konsultasi Pasien Pertama ({queue[0].queueNumber})</span>
+                    <svg className="w-4 h-4 lg:w-[16px] lg:h-[16px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
                 </button>
               )}
             </div>

@@ -56,14 +56,25 @@ export const consultationController = new Elysia({ prefix: "/api/consultation" }
   // 4. Unduh berkas audio preset
   .get(
     "/presets/:id/audio",
-    ({ params }) => {
-      const filename = params.id.endsWith(".wav") ? params.id : `${params.id}.wav`;
-      const filePath = `src/assets/audio/${filename}`;
-      const bunGlobal = (globalThis as unknown as { Bun?: { file: (path: string) => unknown } }).Bun;
-      if (bunGlobal) {
-        return bunGlobal.file(filePath);
+    ({ params, set }) => {
+      const bunGlobal = (globalThis as unknown as { Bun?: { file: (path: string) => any } }).Bun;
+      if (!bunGlobal) {
+        return new Response("Not implemented", { status: 501 });
       }
-      return new Response("Not implemented", { status: 501 });
+
+      const baseName = params.id.replace(/\.(wav|mp3|webm|m4a|ogg)$/i, "");
+      const possibleExtensions = [".wav", ".mp3", ".webm", ".m4a", ".ogg"];
+
+      for (const ext of possibleExtensions) {
+        const filePath = `src/assets/audio/${baseName}${ext}`;
+        const file = bunGlobal.file(filePath);
+        if (file && file.size > 0) {
+          return file;
+        }
+      }
+
+      set.status = 404;
+      return { error: `Berkas audio untuk preset '${params.id}' tidak ditemukan di 'src/assets/audio/'.` };
     }
   )
 

@@ -164,12 +164,15 @@ export function PatientQueueModal({
 
                 <button
                   type="button"
-                  className="px-3 py-1.5 rounded-lg bg-blue-600 group-hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors lg:px-[12px] lg:py-[6px] lg:text-[12px] lg:rounded-[6px] lg:gap-[6px]"
+                  className="group relative inline-block cursor-pointer focus:outline-hidden"
                 >
-                  <span>Pilih Pasien</span>
-                  <svg className="w-3.5 h-3.5 lg:w-[14px] lg:h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <span className="absolute inset-0 w-full h-full rounded-lg bg-blue-800 translate-y-0.5 transition-transform group-hover:translate-y-1 group-active:translate-y-0 lg:rounded-[6px]" />
+                  <span className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 group-hover:bg-blue-500 text-white font-bold text-xs border-t border-blue-400/40 shadow-xs transition-transform transform -translate-y-0.5 group-hover:-translate-y-0.5 group-active:translate-y-0.5 lg:px-[12px] lg:py-[6px] lg:text-[12px] lg:rounded-[6px] lg:gap-[6px]">
+                    <span>Pilih Pasien</span>
+                    <svg className="w-3.5 h-3.5 lg:w-[14px] lg:h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
                 </button>
               </div>
             </div>
