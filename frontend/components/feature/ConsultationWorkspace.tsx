@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { PatientQueueSidebar } from "@/components/feature/PatientQueueSidebar";
 import { SimrsRecordingModal } from "@/components/feature/SimrsRecordingModal";
+import { SimrsAudioUploadModal } from "@/components/feature/SimrsAudioUploadModal";
 import { SimrsIntegrationModal } from "@/components/feature/SimrsIntegrationModal";
 import { TranscriptAndPrivacyPanel } from "@/components/feature/TranscriptAndPrivacyPanel";
 import { SoapWorkspacePanel } from "@/components/feature/SoapWorkspacePanel";
@@ -35,7 +36,6 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
 
   // 2. Preset Suara Simulasi
   const [presets, setPresets] = useState<AudioPresetItem[]>([]);
-  const [processingPresetId, setProcessingPresetId] = useState<string | null>(null);
 
   // 3. State Hasil Pemrosesan Konsultasi
   const [transcript, setTranscript] = useState<string>("");
@@ -51,12 +51,12 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
   // 5. Tab & Modal State
   const [activeSoapTab, setActiveSoapTab] = useState<"soap" | "patientSummary">("soap");
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isIntegrationModalOpen, setIsIntegrationModalOpen] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const workspaceRef = useRef<HTMLDivElement | null>(null);
 
-  // Memuat antrean pasien dari BE pada awal render
+  // Memuat antrean pasien & preset dari BE pada awal render
   useEffect(() => {
     let ignore = false;
     getConsultationQueue()
@@ -147,7 +147,6 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
     setHighlightQuote(null);
     setIsTranscribing(true);
     setIsGeneratingSoap(false);
-    setProcessingPresetId(presetId);
 
     try {
       // Tahap 1: Panggil backend preset process
@@ -184,7 +183,6 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
     } finally {
       setIsTranscribing(false);
       setIsGeneratingSoap(false);
-      setProcessingPresetId(null);
     }
   };
 
@@ -193,6 +191,7 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
     if (!selectedPatient) return;
 
     setIsRecordModalOpen(false);
+    setIsUploadModalOpen(false);
     setErrorMessage(null);
     setSoapData(null);
     setHighlightQuote(null);
@@ -234,14 +233,6 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
     } finally {
       setIsTranscribing(false);
       setIsGeneratingSoap(false);
-    }
-  };
-
-  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      await handleProcessAudio(file, file.name);
-      e.target.value = "";
     }
   };
 
@@ -289,15 +280,6 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
           <span className="text-xs text-amber-600 font-medium">Pilih pasien di antrean</span>
         )}
       </div>
-
-      {/* Hidden File Input untuk Unggah Berkas Audio */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileInputChange}
-        accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg"
-        className="hidden"
-      />
 
       {/* 3. Main Layout: Sidebar Kiri (Antrean) + Area Kerja Kanan */}
       <div className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col lg:flex-row items-start gap-4 lg:px-[32px] lg:py-[20px] lg:gap-[20px]">
@@ -356,7 +338,7 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
                 </h3>
                 <p className="text-xs text-slate-500 mt-1.5 leading-relaxed lg:text-[13px] lg:leading-[18px] lg:mt-[6px]">
                   Silakan pilih salah satu pasien dari daftar antrean SIMRS di sidebar sebelah kiri
-                  untuk membuka modul rekam suara, unggah rekaman, dan simulasi anamnesis.
+                  untuk membuka modul rekam suara, unggah berkas rekaman, dan audio simulasi.
                 </p>
               </div>
 
@@ -426,119 +408,64 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
                 </div>
               </div>
 
-              {/* 4 Pilihan Tindakan Anamnesis (HANYA MUNCUL SETELAH MEMILIH PASIEN) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-[12px]">
+              {/* 2 Pilihan Utama Anamnesis (Rekam Suara & Unggah/Simulasi Modal) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 lg:gap-[16px]">
                 {/* 1. Rekam Suara (Mikrofon) */}
                 <button
                   type="button"
                   onClick={() => setIsRecordModalOpen(true)}
                   disabled={isProcessing}
-                  className="group p-4 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 hover:-translate-y-0.5 transition-all cursor-pointer text-left flex flex-col justify-between disabled:opacity-60 disabled:cursor-not-allowed lg:p-[16px] lg:rounded-[12px]"
+                  className="group p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 hover:-translate-y-0.5 transition-all cursor-pointer text-left flex items-start gap-3.5 disabled:opacity-60 disabled:cursor-not-allowed lg:p-[18px] lg:rounded-[14px] lg:gap-[14px]"
                 >
-                  <div className="flex items-center justify-between mb-3 lg:mb-[12px]">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 group-hover:scale-105 transition-transform lg:w-[40px] lg:h-[40px] lg:rounded-[10px]">
-                      <svg className="w-5 h-5 lg:w-[20px] lg:h-[20px]" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-                      </svg>
-                    </div>
-                    <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 lg:text-[11px] lg:px-[8px] lg:py-[2px]">
-                      Mikrofon
-                    </span>
+                  <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 group-hover:scale-105 transition-transform shrink-0 lg:w-[44px] lg:h-[44px] lg:rounded-[12px]">
+                    <svg className="w-5 h-5 lg:w-[22px] lg:h-[22px]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                    </svg>
                   </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors lg:text-[14px] lg:leading-[18px]">
-                      Rekam Suara
-                    </h3>
-                    <p className="text-[11px] text-slate-500 mt-1 lg:text-[11px] lg:leading-[15px] lg:mt-[4px]">
-                      Anamnesis live via mikrofon dokter & pasien
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1 lg:mb-[4px]">
+                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors lg:text-[15px] lg:leading-[20px]">
+                        Rekam Suara
+                      </h3>
+                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 lg:text-[11px] lg:px-[8px] lg:py-[2px]">
+                        Mikrofon Live
+                      </span>
+                    </div>
+                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed lg:text-[12px] lg:leading-[16px]">
+                      Anamnesis langsung via mikrofon dokter & pasien dengan pengenalan giliran bicara
                     </p>
                   </div>
                 </button>
 
-                {/* 2. Unggah Audio (Berkas) */}
+                {/* 2. Unggah Audio & Simulasi (Modal Drag & Drop + 2 Audio Dummy) */}
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => setIsUploadModalOpen(true)}
                   disabled={isProcessing}
-                  className="group p-4 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 hover:-translate-y-0.5 transition-all cursor-pointer text-left flex flex-col justify-between disabled:opacity-60 disabled:cursor-not-allowed lg:p-[16px] lg:rounded-[12px]"
+                  className="group p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-indigo-400 hover:-translate-y-0.5 transition-all cursor-pointer text-left flex items-start gap-3.5 disabled:opacity-60 disabled:cursor-not-allowed lg:p-[18px] lg:rounded-[14px] lg:gap-[14px]"
                 >
-                  <div className="flex items-center justify-between mb-3 lg:mb-[12px]">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 group-hover:scale-105 transition-transform lg:w-[40px] lg:h-[40px] lg:rounded-[10px]">
-                      <svg className="w-5 h-5 lg:w-[20px] lg:h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
+                  <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 group-hover:scale-105 transition-transform shrink-0 lg:w-[44px] lg:h-[44px] lg:rounded-[12px]">
+                    <svg className="w-5 h-5 lg:w-[22px] lg:h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1 lg:mb-[4px]">
+                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors lg:text-[15px] lg:leading-[20px]">
+                        Unggah Audio & Simulasi
+                      </h3>
+                      <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 lg:text-[11px] lg:px-[8px] lg:py-[2px]">
+                        Drag & Drop / 2 Dummy
+                      </span>
                     </div>
-                    <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 lg:text-[11px] lg:px-[8px] lg:py-[2px]">
-                      Berkas
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors lg:text-[14px] lg:leading-[18px]">
-                      Unggah Audio
-                    </h3>
-                    <p className="text-[11px] text-slate-500 mt-1 lg:text-[11px] lg:leading-[15px] lg:mt-[4px]">
-                      Upload berkas rekaman MP3, WAV, atau WebM
-                    </p>
-                  </div>
-                </button>
-
-                {/* 3. Audio Simulasi 1 (Hipertensi & DM) */}
-                <button
-                  type="button"
-                  onClick={() => handleProcessPreset("preset-1")}
-                  disabled={isProcessing}
-                  className="group p-4 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-emerald-400 hover:-translate-y-0.5 transition-all cursor-pointer text-left flex flex-col justify-between disabled:opacity-60 disabled:cursor-not-allowed lg:p-[16px] lg:rounded-[12px]"
-                >
-                  <div className="flex items-center justify-between mb-3 lg:mb-[12px]">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 group-hover:scale-105 transition-transform lg:w-[40px] lg:h-[40px] lg:rounded-[10px]">
-                      <svg className="w-5 h-5 lg:w-[20px] lg:h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                      </svg>
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1 lg:text-[11px] lg:px-[8px] lg:py-[2px]">
-                      {processingPresetId === "preset-1" && (
-                        <span className="w-2 h-2 rounded-full border border-emerald-600 border-t-transparent animate-spin lg:w-[8px] lg:h-[8px]" />
-                      )}
-                      Simulasi 1
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition-colors lg:text-[14px] lg:leading-[18px]">
-                      {presets[0]?.title || "Audio Simulasi 1"}
-                    </h3>
-                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-1 lg:text-[11px] lg:leading-[15px] lg:mt-[4px]">
-                      {presets[0]?.description || "Kasus Hipertensi & Diabetes Melitus"}
-                    </p>
-                  </div>
-                </button>
-
-                {/* 4. Audio Simulasi 2 (GERD & Asam Lambung) */}
-                <button
-                  type="button"
-                  onClick={() => handleProcessPreset("preset-2")}
-                  disabled={isProcessing}
-                  className="group p-4 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-amber-400 hover:-translate-y-0.5 transition-all cursor-pointer text-left flex flex-col justify-between disabled:opacity-60 disabled:cursor-not-allowed lg:p-[16px] lg:rounded-[12px]"
-                >
-                  <div className="flex items-center justify-between mb-3 lg:mb-[12px]">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 group-hover:scale-105 transition-transform lg:w-[40px] lg:h-[40px] lg:rounded-[10px]">
-                      <svg className="w-5 h-5 lg:w-[20px] lg:h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                      </svg>
-                    </div>
-                    <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 flex items-center gap-1 lg:text-[11px] lg:px-[8px] lg:py-[2px]">
-                      {processingPresetId === "preset-2" && (
-                        <span className="w-2 h-2 rounded-full border border-amber-600 border-t-transparent animate-spin lg:w-[8px] lg:h-[8px]" />
-                      )}
-                      Simulasi 2
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-amber-600 transition-colors lg:text-[14px] lg:leading-[18px]">
-                      {presets[1]?.title || "Audio Simulasi 2"}
-                    </h3>
-                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-1 lg:text-[11px] lg:leading-[15px] lg:mt-[4px]">
-                      {presets[1]?.description || "Kasus GERD & Asam Lambung"}
+                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed lg:text-[12px] lg:leading-[16px]">
+                      Tarik & lepas berkas MP3/WAV atau gunakan 2 audio dummy simulasi siap pakai
                     </p>
                   </div>
                 </button>
@@ -615,6 +542,15 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
         isOpen={isRecordModalOpen}
         onClose={() => setIsRecordModalOpen(false)}
         onSaveRecording={handleProcessAudio}
+        isProcessing={isProcessing}
+      />
+
+      <SimrsAudioUploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onUploadFile={(file) => handleProcessAudio(file, file.name)}
+        onSelectPreset={handleProcessPreset}
+        presets={presets}
         isProcessing={isProcessing}
       />
 
