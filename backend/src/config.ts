@@ -1,13 +1,16 @@
 export type ProviderMode = "unified";
+export type STTProviderMode = "unified" | "hf_space";
 
 export interface AppConfig {
   port: number;
   corsOrigin: string;
   stt: {
-    provider: ProviderMode;
+    provider: STTProviderMode;
     apiKey: string;
     baseUrl: string;
     model: string;
+    hfSpaceUrl?: string;
+    hfToken?: string;
   };
   llm: {
     provider: ProviderMode;
@@ -35,11 +38,20 @@ function requirePort(): number {
 }
 
 function loadConfig(): AppConfig {
-  const sttApiKey = process.env.STT_API_KEY || process.env.OPENAI_API_KEY || "";
+  const sttApiKey = process.env.STT_API_KEY || "";
   const sttBaseUrl = process.env.STT_BASE_URL || "";
   const sttModel = process.env.STT_MODEL || "";
 
-  const llmApiKey = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY || "";
+  const hfSpaceUrl = process.env.HF_SPACE_URL || "";
+  const hfToken = process.env.HF_TOKEN ? process.env.HF_TOKEN.trim() : "";
+  const sttProvider: STTProviderMode =
+    process.env.STT_PROVIDER === "hf_space"
+      ? "hf_space"
+      : hfSpaceUrl
+      ? "hf_space"
+      : "unified";
+
+  const llmApiKey = process.env.LLM_API_KEY || "";
   const llmBaseUrl = process.env.LLM_BASE_URL || "";
   const llmModel = process.env.LLM_MODEL || "";
 
@@ -47,10 +59,12 @@ function loadConfig(): AppConfig {
     port: requirePort(),
     corsOrigin: requireEnv("CORS_ORIGIN"),
     stt: {
-      provider: "unified",
+      provider: sttProvider,
       apiKey: sttApiKey,
       baseUrl: sttBaseUrl,
       model: sttModel,
+      hfSpaceUrl,
+      hfToken,
     },
     llm: {
       provider: "unified",

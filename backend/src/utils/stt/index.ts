@@ -100,6 +100,13 @@ export class UnifiedSTTProvider implements STTProvider {
   }
 }
 
+import { HuggingFaceSpaceSTTProvider } from "./hf-space";
+
+export { HuggingFaceSpaceSTTProvider };
+
 export function getSTTProvider(): STTProvider {
+  if (config.stt.provider === "hf_space" && config.stt.hfSpaceUrl) {
+    return new HuggingFaceSpaceSTTProvider(config.stt.hfSpaceUrl, config.stt.hfToken);
+  }
   return new UnifiedSTTProvider(config.stt.apiKey, config.stt.baseUrl, config.stt.model);
 }
