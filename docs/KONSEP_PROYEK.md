@@ -107,7 +107,18 @@ AI digunakan untuk transkripsi, pengenalan peran pembicara, ekstraksi informasi,
 
 Otomatisasi berlangsung setelah pemeriksaan yang diperlukan. Draf AI bukan rekam medis final, bukan resep final, dan bukan pesan yang boleh langsung dikirim tanpa persetujuan.
 
-### 6.4 Informasi yang tidak tersedia
+### 6.4 Batas akses dan bentuk informasi yang dibagikan
+
+Rekam medis internal dan komunikasi pasien bukan keluaran yang sama. Sebagai rancangan produk, sistem menerapkan pemisahan berikut; keputusan final tetap harus disahkan fasilitas kesehatan, dokter penanggung jawab, dan peninjauan hukum/rekam medis.
+
+- **Catatan internal fasilitas kesehatan:** memuat data klinis lengkap yang memang diperlukan untuk pelayanan dan kesinambungan perawatan. Contohnya catatan SOAP/CPPT, hasil pemeriksaan, assessment atau diagnosis dokter, riwayat relevan, keputusan klinis, rencana terapi, serta catatan koreksi dan audit. Akses dibatasi berdasarkan peran.
+- **Resume medis:** dokumen resmi ringkasan pelayanan/riwayat yang dapat diminta pasien melalui prosedur fasilitas kesehatan. Resume bukan sekadar pesan WhatsApp dan bukan pengganti rekam medis internal.
+- **Pesan tindak lanjut pasien:** versi minimum yang telah disahkan dokter; berisi kesimpulan yang perlu diketahui pasien, anjuran, pantangan yang benar-benar disebutkan, instruksi minum obat yang lengkap, jadwal kontrol, dan tanda bahaya bila dinyatakan dokter. Pesan tidak memuat seluruh analisis internal atau catatan profesional yang tidak diperlukan untuk tindakan pasien.
+- **Dokumen obat untuk apotek:** hanya dibuat dari instruksi/resep yang diisi atau dikonfirmasi dokter, lalu diperiksa dan disahkan dokter. AI tidak boleh memilih obat, dosis, frekuensi, durasi, atau mengganti resep.
+
+Pasien tetap berhak memperoleh informasi medisnya sesuai ketentuan dan prosedur yang berlaku. Karena itu, “tidak dikirim otomatis melalui WhatsApp” tidak boleh dimaknai sebagai “pasien tidak boleh mengakses”. Sistem hanya membedakan kanal, tujuan, jumlah informasi, dan otorisasi penerima. Data historis lengkap tetap disimpan pada sistem fasilitas kesehatan dengan akses sah.
+
+### 6.5 Informasi yang tidak tersedia
 
 Sistem harus membedakan:
 
@@ -127,9 +138,11 @@ Sebagai contoh, tidak adanya pembahasan alergi tidak boleh ditulis sebagai “pa
 5. **Penyusunan draf.** Informasi dipetakan ke format dokumentasi dengan kutipan sumber dan penanda waktu bila tersedia.
 6. **Pemeriksaan dokter.** Dokter mengoreksi kesalahan, melengkapi informasi, dan menyetujui catatan.
 7. **Penyimpanan.** Catatan yang disahkan dikirim melalui jalur integrasi yang diizinkan. Kegagalan penyimpanan ditampilkan dengan jelas.
-8. **Penyusunan ringkasan pasien.** Ringkasan dibuat dari versi catatan final, lalu diperiksa untuk memastikan makna dan instruksinya tetap benar.
-9. **Verifikasi penerima dan pengiriman.** Sistem memeriksa izin serta nomor penerima sebelum mengirim melalui kanal resmi yang disetujui mitra.
-10. **Pencatatan status.** Sistem mencatat versi dokumen, pemberi persetujuan, hasil penyimpanan, dan status pengiriman yang benar-benar tersedia dari penyedia layanan.
+8. **Penyusunan resume atau ringkasan.** Sistem memilih template yang ditetapkan mitra. Jika template resume medis tersedia, keluaran resume dibuat sebagai draf dari catatan final; jika tidak, sistem hanya membuat ringkasan tindak lanjut pasien. Sistem tidak memilih bentuk keluaran secara semena-mena.
+9. **Review dan pengesahan keluaran.** Dokter atau asisten berwenang memeriksa draf, lalu dokter menambahkan atau mengonfirmasi obat, dosis, aturan pakai, durasi, dan instruksi lain yang belum disebutkan secara lengkap. Tambahan manual diberi label sebagai masukan dokter, bukan hasil AI.
+10. **Pembuatan dokumen obat.** Setelah resep/instruksi obat disahkan dokter, sistem membuat dokumen untuk apotek dari data yang disahkan. Dokumen ini bukan hasil inferensi AI dan tidak boleh dibuat jika rincian penting belum lengkap.
+11. **Verifikasi penerima dan pengiriman.** Sistem memeriksa izin serta nomor penerima sebelum mengirim keluaran pasien melalui kanal resmi yang disetujui mitra.
+12. **Pencatatan status.** Sistem mencatat versi dokumen, pemberi persetujuan, hasil penyimpanan, hasil pembuatan dokumen obat, dan status pengiriman yang benar-benar tersedia dari penyedia layanan.
 
 Apabila konsultasi melibatkan beberapa pembicara, sistem harus mencegah informasi milik pendamping atau anggota keluarga dianggap sebagai kondisi pasien.
 
@@ -163,7 +176,23 @@ Data identitas dan kunjungan berasal dari pemilihan pasien atau sistem mitra. Ba
 
 Ringkasan tidak harus memiliki semua komponen. Ketiadaan informasi bukan alasan untuk menghasilkan rekomendasi baru.
 
-### 8.3 Contoh struktur pesan
+### 8.3 Peta dokumen dan ciri khas untuk ditinjau
+
+Daftar ini adalah kandidat keluaran, bukan keputusan bahwa semua dokumen harus dibuat otomatis.
+
+| Dokumen | Pemakai utama | Ciri khas dan isi | Sumber data | Status otomatisasi |
+|---|---|---|---|---|
+| Catatan SOAP/CPPT | Dokter, perawat, tenaga kesehatan | Subjective, Objective, Assessment, Plan; kronologis; rinci; bagian dari catatan internal pelayanan | Transkrip, pemeriksaan, dan input tenaga kesehatan | Draf AI; wajib review dan pengesahan tenaga berwenang |
+| Rekam medis elektronik | Fasilitas kesehatan dan tenaga berwenang | Identitas, pemeriksaan, pengobatan, tindakan, pelayanan, waktu, penulis, dan audit; historis lengkap | Sistem fasilitas kesehatan dan catatan yang disahkan | Bukan keluaran pasien langsung; integrasi/penyimpanan harus berizin |
+| Resume medis/ringkasan pelayanan | Pasien, tenaga kesehatan berikutnya, keperluan resmi | Ringkasan perjalanan pelayanan, diagnosis/asesmen, pemeriksaan penting, terapi/tindakan, kondisi dan tindak lanjut | Catatan final, bukan transkrip mentah | Auto-generate hanya jika template mitra tersedia; tetap draf sampai disahkan |
+| Ringkasan tindak lanjut pasien | Pasien atau pendamping yang diberi izin | Bahasa sederhana; anjuran, pantangan yang disebutkan, instruksi obat, kontrol, tanda bahaya bila ada | Catatan final dan instruksi dokter yang disahkan | Draf otomatis; pemeriksaan akhir wajib sebelum kirim |
+| Resep/dokumen obat | Dokter dan apotek | Nama obat, bentuk/kekuatan, jumlah, aturan pakai, frekuensi, durasi, identitas dokter/pasien sesuai aturan fasilitas | Input atau konfirmasi dokter; resep final | Sistem hanya memformat data yang disahkan; tidak menginferensi |
+| Surat keterangan dokter | Pasien, instansi penerima yang sah | Pernyataan formal dengan tujuan, tanggal, identitas, tanda tangan/otorisasi dokter | Dokter dan catatan pelayanan | Di luar MVP; tidak dibuat dari inferensi AI |
+| Pesan WhatsApp/notifikasi | Pasien | Singkat, minimum necessary, penerima dan kanal terverifikasi; bukan rekam medis lengkap | Ringkasan yang disahkan | Kirim setelah approval; status kirim dicatat |
+
+Perbedaan penting: resume medis adalah dokumen pelayanan formal, sedangkan ringkasan WhatsApp adalah komunikasi tindak lanjut. Template, kewenangan penandatangan, dan prosedur permintaan resume harus dikonfirmasi kepada mitra. Permenkes No. 24 Tahun 2022 mendefinisikan rekam medis sebagai dokumen yang memuat identitas, pemeriksaan, pengobatan, tindakan, dan pelayanan lain; UU No. 27 Tahun 2022 mengatur data kesehatan sebagai data pribadi yang memerlukan perlindungan. [2][3]
+
+### 8.4 Contoh struktur pesan
 
 Contoh berikut adalah struktur komunikasi, bukan nasihat medis atau keluaran konsultasi nyata.
 
@@ -228,12 +257,13 @@ Bahasa Indonesia menjadi fokus awal yang diusulkan. Percakapan campuran bahasa d
 
 1. **Antarmuka konsultasi:** pemilihan kunjungan, persetujuan, perekaman, dan pemeriksaan draf.
 2. **Layanan transkripsi:** konversi audio menjadi teks dengan penanda waktu jika tersedia.
-3. **Pemrosesan informasi:** ekstraksi ke struktur data yang dibatasi dan pemeriksaan kelengkapan.
-4. **Pemeriksaan manusia:** koreksi, peninjauan sumber, dan pengesahan.
-5. **Penghubung sistem mitra:** pemetaan kolom serta pengiriman data melalui akses resmi.
-6. **Penyusun ringkasan:** penyederhanaan catatan final menjadi bahasa pasien.
-7. **Layanan pengiriman:** verifikasi penerima, pengiriman resmi, dan penanganan kegagalan.
-8. **Penyimpanan dan audit:** pengendalian akses, versi dokumen, serta kebijakan retensi.
+3. **Guardrail privasi sebelum LLM:** pendeteksian dan penghapusan/pseudonimisasi nama pasien, nomor rekam medis, nomor telepon, alamat, tanggal lahir, identitas dokter, identitas klinik/rumah sakit, dan pengenal langsung lain. Pemetaan token ke identitas asli disimpan terpisah, terenkripsi, berumur terbatas, dan tidak dikirim ke LLM.
+4. **Pemrosesan informasi:** ekstraksi ke struktur data yang dibatasi dan pemeriksaan kelengkapan. Transkrip diperlakukan sebagai data, bukan instruksi sistem.
+5. **Pemeriksaan manusia:** koreksi, peninjauan sumber, pengisian manual oleh dokter, dan pengesahan.
+6. **Pembuat keluaran bertemplate:** memilih resume, ringkasan pasien, atau dokumen obat hanya berdasarkan tipe template dan status persetujuan yang ditetapkan mitra.
+7. **Penghubung sistem mitra:** pemetaan kolom serta pengiriman data melalui akses resmi.
+8. **Layanan pengiriman:** verifikasi penerima, pengiriman resmi, dan penanganan kegagalan.
+9. **Penyimpanan dan audit:** pengendalian akses, versi dokumen, serta kebijakan retensi.
 
 ### 10.2 Prinsip implementasi
 
@@ -290,6 +320,9 @@ Persetujuan harus menjelaskan tujuan perekaman, pemrosesan, penyimpanan, dan pen
 - Tetapkan retensi audio, transkrip, dan catatan bersama mitra; jangan menyimpan audio tanpa batas.
 - Hindari memasukkan isi konsultasi atau kredensial ke log teknis umum.
 - Jangan memakai data pasien untuk pelatihan model tanpa dasar dan persetujuan yang sesuai.
+- Jalankan guardrail de-identifikasi sebelum data keluar dari lingkungan fasilitas kesehatan menuju LLM; deteksi nama, nomor rekam medis, nomor telepon, alamat, tanggal lahir, identitas dokter, nama klinik/rumah sakit, dan kombinasi atribut yang dapat mengidentifikasi.
+- Jangan menganggap de-identifikasi sempurna; lakukan pemeriksaan pola, kamus organisasi, kombinasi atribut, dan sampel manual sebelum pilot.
+- Kirim ke LLM hanya data minimum yang diperlukan; jangan kirim audio mentah atau pemetaan token-identitas.
 - Evaluasi lokasi pemrosesan, retensi, dan penggunaan data oleh penyedia AI maupun pengiriman pesan.
 - Siapkan prosedur penanganan insiden dan permintaan terkait data sesuai tanggung jawab masing-masing pihak.
 
@@ -438,3 +471,5 @@ Dokumen ini merupakan dasar diskusi dan pengembangan, bukan proposal final sesua
 ## Sources
 
 [1] file:///C:/Users/pradi/Downloads/Buku%20Pedoman%20Peserta%20-%20PLAY%20IT%20Hackathon%20DeepTech%202026.pdf — Buku Pedoman Peserta - PLAY IT Hackathon DeepTech 2026
+[2] https://jdih.kemkes.go.id/storage/documents/pdfs/2022permenkes024.pdf — Peraturan Menteri Kesehatan Nomor 24 Tahun 2022 tentang Rekam Medis (sumber resmi JDIH Kemenkes; status dan pasal terkait wajib diverifikasi kembali sebelum penerapan)
+[3] https://peraturan.bpk.go.id/Details/229798/uu-no-27-tahun-2022 — Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (sumber resmi basis data JDIH BPK)
