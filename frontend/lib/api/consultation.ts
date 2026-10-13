@@ -3,6 +3,7 @@ import type {
   ConsultationProcessResult,
   ConsultationSamplesResponse,
   DeidentificationResult,
+  SOAPData,
 } from "../types";
 
 function extractErrorMessage(errorValue: unknown, defaultMessage: string): string {
@@ -89,3 +90,56 @@ export async function deidentifyText(
   }
   return data;
 }
+
+/**
+ * Mentranskripsikan berkas audio secara bertahap (STT + Diarization + Deidentifikasi) via Eden.
+ */
+export async function transcribeConsultationAudio(
+  audioBlob: Blob,
+  filename: string
+): Promise<{
+  text: string;
+  deidentification: DeidentificationResult;
+  durationSeconds?: number;
+  provider: string;
+}> {
+  const audioFile =
+    audioBlob instanceof File
+      ? audioBlob
+      : new File([audioBlob], filename, { type: audioBlob.type || "audio/webm" });
+
+  const { data, error } = await eden.api.consultation.stt.post({
+    audio: audioFile,
+  } as Record<string, unknown>);
+
+  if (error) {
+    throw new Error(
+      extractErrorMessage(error.value, `Gagal mentranskripsikan berkas audio (${error.status}).`)
+    );
+  }
+  return data as {
+    text: string;
+    deidentification: DeidentificationResult;
+    durationSeconds?: number;
+    provider: string;
+  };
+}
+
+/**
+ * Mengekstrak draf SOAP medis dari teks transkrip percakapan.
+ */
+export async function autofillConsultationSoap(
+  text: string
+): Promise<{ providerUsed: string; soap: SOAPData }> {
+  const { data, error } = await eden.api.consultation.autofill.post({
+    text,
+  });
+
+  if (error) {
+    throw new Error(
+      extractErrorMessage(error.value, "Gagal mengekstrak catatan SOAP medis.")
+    );
+  }
+  return data as { providerUsed: string; soap: SOAPData };
+}
+

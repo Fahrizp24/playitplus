@@ -53,7 +53,12 @@ export class ConsultationService {
   async transcribeAudio(
     file: Blob,
     filename?: string
-  ): Promise<{ text: string; durationSeconds?: number; provider: string }> {
+  ): Promise<{
+    text: string;
+    deidentification: DeidentificationResult;
+    durationSeconds?: number;
+    provider: string;
+  }> {
     const actualFilename = filename || (file as any).name || (file as any).filename;
     if (!actualFilename) {
       throw new Error("Nama berkas audio wajib disertakan.");
@@ -66,8 +71,10 @@ export class ConsultationService {
       language: "id",
     });
     const diarized = await this.diarizeTranscript(result.text);
+    const deid = this.deidentify(diarized);
     return {
       text: diarized,
+      deidentification: deid,
       durationSeconds: result.durationSeconds,
       provider: stt.name,
     };
