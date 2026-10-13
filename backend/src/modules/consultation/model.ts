@@ -34,9 +34,11 @@ export type DeidentificationResult = Static<typeof DeidentificationResultSchema>
 export const TraceableQuoteSchema = t.Object({
   quote: t.String(),
   sourceSpeaker: t.Optional(
-    t.Union([t.Literal("Dokter"), t.Literal("Pasien"), t.Literal("Pendamping")])
+    t.Nullable(
+      t.Union([t.Literal("Dokter"), t.Literal("Pasien"), t.Literal("Pendamping")])
+    )
   ),
-  context: t.Optional(t.String()),
+  context: t.Optional(t.Nullable(t.String())),
 });
 
 export type TraceableQuote = Static<typeof TraceableQuoteSchema>;
@@ -46,7 +48,7 @@ export const MedicationSchema = t.Object({
   dosage: t.String(),
   frequency: t.String(),
   duration: t.String(),
-  instructions: t.Optional(t.String()),
+  instructions: t.Optional(t.Nullable(t.String())),
 });
 
 export type Medication = Static<typeof MedicationSchema>;
@@ -55,8 +57,8 @@ export const SOAPDataSchema = t.Object({
   subjective: t.Object({
     chiefComplaint: t.String(),
     historyOfPresentIllness: t.String(),
-    pastMedicalHistory: t.Optional(t.String()),
-    familyMedicalHistory: t.Optional(t.String()),
+    pastMedicalHistory: t.Optional(t.Nullable(t.String())),
+    familyMedicalHistory: t.Optional(t.Nullable(t.String())),
     allergies: t.Object({
       status: t.Union([
         t.Literal("DISANGKAL"),
@@ -64,25 +66,27 @@ export const SOAPDataSchema = t.Object({
         t.Literal("TIDAK_DISEBUTKAN"),
         t.Literal("PERLU_KONFIRMASI"),
       ]),
-      details: t.Optional(t.String()),
+      details: t.Optional(t.Nullable(t.String())),
     }),
     evidence: t.Array(TraceableQuoteSchema),
   }),
   objective: t.Object({
     vitalSigns: t.Optional(
-      t.Object({
-        bloodPressure: t.Optional(t.String()),
-        heartRate: t.Optional(t.String()),
-        temperature: t.Optional(t.String()),
-        respiratoryRate: t.Optional(t.String()),
-      })
+      t.Nullable(
+        t.Object({
+          bloodPressure: t.Optional(t.Nullable(t.String())),
+          heartRate: t.Optional(t.Nullable(t.String())),
+          temperature: t.Optional(t.Nullable(t.String())),
+          respiratoryRate: t.Optional(t.Nullable(t.String())),
+        })
+      )
     ),
     physicalExamFindings: t.String(),
     evidence: t.Array(TraceableQuoteSchema),
   }),
   assessment: t.Object({
     primaryDiagnosis: t.String(),
-    differentialDiagnosis: t.Optional(t.Array(t.String())),
+    differentialDiagnosis: t.Optional(t.Nullable(t.Array(t.String()))),
     clinicalCertainty: t.Union([
       t.Literal("PASTI"),
       t.Literal("DUGAAN_KERJA"),
@@ -92,16 +96,16 @@ export const SOAPDataSchema = t.Object({
   }),
   plan: t.Object({
     medications: t.Array(MedicationSchema),
-    diagnosticOrders: t.Optional(t.Array(t.String())),
+    diagnosticOrders: t.Optional(t.Nullable(t.Array(t.String()))),
     patientEducation: t.Array(t.String()),
-    contraindicationsOrRestrictions: t.Optional(t.Array(t.String())),
+    contraindicationsOrRestrictions: t.Optional(t.Nullable(t.Array(t.String()))),
     followUpPlan: t.String(),
     emergencyRedFlags: t.Array(t.String()),
     evidence: t.Array(TraceableQuoteSchema),
   }),
   patientSummary: t.Object({
-    facilityName: t.Optional(t.String()),
-    doctorName: t.Optional(t.String()),
+    facilityName: t.Optional(t.Nullable(t.String())),
+    doctorName: t.Optional(t.Nullable(t.String())),
     date: t.String(),
     simpleConclusion: t.String(),
     medicationInstructions: t.Array(t.String()),

@@ -132,8 +132,10 @@ ATURAN KETAT:
 2. PENGENALAN PERAN (ROLE ATTRIBUTION):
    - "Dokter:": Menyapa pasien, menanyakan keluhan utama, menggali riwayat penyakit/alergi, memeriksa fisik, menyampaikan diagnosis, menjelaskan resep obat, memberi anjuran, dan menetapkan jadwal kontrol/tanda bahaya.
    - "Pasien:": Menjawab pertanyaan, menceritakan gejala dan durasi sakit, mengeluhkan rasa nyeri, menyebutkan obat yang sempat diminum, atau mengonfirmasi instruksi dokter.
-3. FORMATTING:
-   - Setiap giliran bicara (speaker turn) WAJIB dimulai di baris baru dengan format "NamaRole: Kalimat".
+3. FORMATTING (SANGAT KETAT):
+   - Setiap giliran bicara (speaker turn) WAJIB dimulai di baris baru dengan format polos "NamaRole: Kalimat".
+   - DILARANG menggunakan tanda bintang markdown tebal (**Dokter:** atau **Pasien:**). WAJIB teks biasa polos: "Dokter: ..." dan "Pasien: ...".
+   - DILARANG menggunakan bullet points (-) atau penomoran (1.).
    - Rapikan tanda baca (titik, koma, tanda tanya) dan kapitalisasi agar menjadi percakapan klinis yang nyaman dibaca.
    - Contoh format:
      Dokter: Selamat siang, silakan duduk. Apa yang dikeluhkan hari ini?

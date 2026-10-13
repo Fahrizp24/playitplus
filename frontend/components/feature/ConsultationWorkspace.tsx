@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SimrsModuleGrid } from "@/components/feature/SimrsModuleGrid";
@@ -10,31 +9,19 @@ import { SimrsIntegrationModal } from "@/components/feature/SimrsIntegrationModa
 import { TranscriptAndPrivacyPanel } from "@/components/feature/TranscriptAndPrivacyPanel";
 import { SoapWorkspacePanel } from "@/components/feature/SoapWorkspacePanel";
 import {
-  getConsultationSamples,
   transcribeConsultationAudio,
   autofillConsultationSoap,
-  deidentifyText,
 } from "@/lib/api";
 import type {
-  ConsultationSamplesResponse,
   DeidentificationResult,
   SOAPData,
 } from "@/lib/types";
 
 interface ConsultationWorkspaceProps {
-  initialSamples: ConsultationSamplesResponse | null;
+  initialSamples?: unknown;
 }
 
-export function ConsultationWorkspace({
-  initialSamples,
-}: ConsultationWorkspaceProps) {
-  // TanStack Query: Fetch samples dengan initialData dari Server Component
-  const { data: samplesData } = useQuery({
-    queryKey: ["consultation", "samples"],
-    queryFn: getConsultationSamples,
-    initialData: initialSamples ?? undefined,
-  });
-
+export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
   // State hasil pemrosesan konsultasi
   const [transcript, setTranscript] = useState<string>("");
   const [deidentification, setDeidentification] = useState<DeidentificationResult | null>(null);
@@ -95,42 +82,7 @@ export function ConsultationWorkspace({
     }
   };
 
-  // 2. Alur Teks Simulasi Kasus
-  const handleRunSample = async () => {
-    const sampleText = samplesData?.samples?.[0]?.text;
-    if (!sampleText) {
-      setErrorMessage(
-        "Data sampel telah dinonaktifkan di server. Silakan gunakan Rekam Suara atau Unggah Audio untuk menguji model AI secara langsung."
-      );
-      return;
-    }
 
-    setErrorMessage(null);
-    setSoapData(null);
-    setHighlightQuote(null);
-    setIsTranscribing(false);
-
-    // TAHAP 1: Transkrip teks sampel langsung tampil
-    setTranscript(sampleText);
-    scrollToWorkspace();
-
-    try {
-      // Deidentifikasi teks
-      const deid = await deidentifyText(sampleText);
-      setDeidentification(deid);
-
-      // TAHAP 2: Ekstraksi Catatan SOAP
-      setIsGeneratingSoap(true);
-      const soapResult = await autofillConsultationSoap(deid.deidentifiedText || sampleText);
-      setSoapData(soapResult.soap);
-    } catch (err: unknown) {
-      console.error("Gagal memproses simulasi sampel:", err);
-      const msg = err instanceof Error ? err.message : "Gagal memproses simulasi kasus.";
-      setErrorMessage(msg);
-    } finally {
-      setIsGeneratingSoap(false);
-    }
-  };
 
   const isProcessing = isTranscribing || isGeneratingSoap;
   const processingStatusText = isTranscribing
@@ -183,11 +135,10 @@ export function ConsultationWorkspace({
           </div>
         )}
 
-        {/* 2. Menu Modul Utama SIMRS (4 Action Cards: Rekam, Unggah, Simulasi, Integrasi) */}
+        {/* 2. Menu Modul Utama SIMRS (3 Action Cards: Rekam, Unggah, Integrasi) */}
         <SimrsModuleGrid
           onOpenRecord={() => setIsRecordModalOpen(true)}
           onUploadFile={async (file) => handleProcessAudio(file, file.name)}
-          onRunSample={handleRunSample}
           onOpenIntegrationModal={() => setIsIntegrationModalOpen(true)}
           isProcessing={isProcessing}
         />
