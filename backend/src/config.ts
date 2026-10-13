@@ -1,41 +1,86 @@
+export type ProviderMode = "mock" | "unified";
+
 export interface AppConfig {
   port: number;
   corsOrigin: string;
   stt: {
-    provider: "unified" | "mock";
+    provider: ProviderMode;
     apiKey: string;
     baseUrl: string;
     model: string;
   };
   llm: {
-    provider: "unified" | "gemini" | "mock";
+    provider: ProviderMode;
     apiKey: string;
     baseUrl: string;
     model: string;
-    geminiApiKey: string;
-    geminiModel: string;
   };
 }
 
-export const config: AppConfig = {
-  port: Number(process.env.PORT) || 3001,
-  corsOrigin: process.env.CORS_ORIGIN || "http://localhost:3000",
-  stt: {
-    provider:
-      (process.env.STT_PROVIDER as any) ||
-      (process.env.STT_API_KEY ? "unified" : "mock"),
-    apiKey: process.env.STT_API_KEY || "",
-    baseUrl: process.env.STT_BASE_URL || "https://api.groq.com/openai/v1",
-    model: process.env.STT_MODEL || "whisper-large-v3-turbo",
-  },
-  llm: {
-    provider:
-      (process.env.LLM_PROVIDER as any) ||
-      (process.env.LLM_API_KEY ? "unified" : "mock"),
-    apiKey: process.env.LLM_API_KEY || "",
-    baseUrl: process.env.LLM_BASE_URL || "https://openrouter.ai/api/v1",
-    model: process.env.LLM_MODEL || "anthropic/claude-3.5-sonnet",
-    geminiApiKey: process.env.GEMINI_API_KEY || "",
-    geminiModel: process.env.GEMINI_MODEL || "gemini-2.5-flash",
-  },
-};
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not configured.`);
+  }
+  return value;
+}
+
+function requireProviderMode(name: string): ProviderMode {
+  const value = process.env[name];
+  if (value !== "mock" && value !== "unified") {
+    throw new Error(`${name} must be "mock" or "unified" (got: ${value ?? "empty"}).`);
+  }
+  return value;
+}
+
+function requirePort(): number {
+  const raw = process.env.PORT;
+  const port = Number(raw);
+  if (!raw || !Number.isInteger(port) || port <= 0) {
+    throw new Error(`PORT must be a valid positive integer (got: ${raw ?? "empty"}).`);
+  }
+  return port;
+}
+
+function loadConfig(): AppConfig {
+  const sttProvider = requireProviderMode("STT_PROVIDER");
+  const llmProvider = requireProviderMode("LLM_PROVIDER");
+
+  const sttApiKey = process.env.STT_API_KEY ?? "";
+  const sttBaseUrl = process.env.STT_BASE_URL ?? "";
+  const sttModel = process.env.STT_MODEL ?? "";
+  const llmApiKey = process.env.LLM_API_KEY ?? "";
+  const llmBaseUrl = process.env.LLM_BASE_URL ?? "";
+  const llmModel = process.env.LLM_MODEL ?? "";
+
+  if (sttProvider === "unified") {
+    if (!sttApiKey) throw new Error("STT_API_KEY is required when STT_PROVIDER=unified.");
+    if (!sttBaseUrl) throw new Error("STT_BASE_URL is required when STT_PROVIDER=unified.");
+    if (!sttModel) throw new Error("STT_MODEL is required when STT_PROVIDER=unified.");
+  }
+
+  if (llmProvider === "unified") {
+    if (!llmApiKey) throw new Error("LLM_API_KEY is required when LLM_PROVIDER=unified.");
+    if (!llmBaseUrl) throw new Error("LLM_BASE_URL is required when LLM_PROVIDER=unified.");
+    if (!llmModel) throw new Error("LLM_MODEL is required when LLM_PROVIDER=unified.");
+  }
+
+  return {
+    port: requirePort(),
+    corsOrigin: requireEnv("CORS_ORIGIN"),
+    stt: {
+      provider: sttProvider,
+      apiKey: sttApiKey,
+      baseUrl: sttBaseUrl,
+      model: sttModel,
+    },
+    llm: {
+      provider: llmProvider,
+      apiKey: llmApiKey,
+      baseUrl: llmBaseUrl,
+      model: llmModel,
+    },
+  };
+}
+
+export const config: AppConfig = loadConfig();

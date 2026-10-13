@@ -6,9 +6,13 @@ import { UnifiedSTTProvider } from "./unified-stt";
 export function getSTTProvider(overrideProvider?: string): STTProvider {
   const providerType = overrideProvider || config.stt.provider;
 
-  if (providerType === "unified" || (config.stt.apiKey && providerType !== "mock")) {
+  if (providerType === "mock") {
+    return new MockSTTProvider();
+  }
+
+  if (providerType === "unified") {
     return new UnifiedSTTProvider(config.stt.apiKey, config.stt.baseUrl, config.stt.model);
   }
 
-  return new MockSTTProvider();
+  throw new Error(`Unknown STT provider: ${providerType ?? "empty"} (expected "mock" or "unified").`);
 }

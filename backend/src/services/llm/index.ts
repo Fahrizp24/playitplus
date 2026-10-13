@@ -1,17 +1,16 @@
 import { config } from "../../config";
 import type { LLMProvider } from "../../types/providers";
-import { GeminiLLMProvider } from "./gemini-llm";
 import { MockLLMProvider } from "./mock-llm";
 import { OpenAICompatibleLLMProvider } from "./openai-compatible-llm";
 
 export function getLLMProvider(overrideProvider?: string): LLMProvider {
   const providerType = overrideProvider || config.llm.provider;
 
-  if (providerType === "gemini" && config.llm.geminiApiKey) {
-    return new GeminiLLMProvider(config.llm.geminiApiKey, config.llm.geminiModel);
+  if (providerType === "mock") {
+    return new MockLLMProvider();
   }
 
-  if (providerType === "unified" || (config.llm.apiKey && providerType !== "mock")) {
+  if (providerType === "unified") {
     return new OpenAICompatibleLLMProvider(
       "unified",
       config.llm.apiKey,
@@ -20,5 +19,5 @@ export function getLLMProvider(overrideProvider?: string): LLMProvider {
     );
   }
 
-  return new MockLLMProvider();
+  throw new Error(`Unknown LLM provider: ${providerType ?? "empty"} (expected "mock" or "unified").`);
 }

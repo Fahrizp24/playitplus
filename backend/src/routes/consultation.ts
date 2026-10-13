@@ -26,7 +26,7 @@ export const consultationRoutes = new Elysia({ prefix: "/api/consultation" })
       },
       llm: {
         configuredProvider: config.llm.provider,
-        hasKey: Boolean(config.llm.apiKey || config.llm.geminiApiKey),
+        hasKey: Boolean(config.llm.apiKey),
         baseUrl: config.llm.baseUrl,
         model: config.llm.model,
       },
@@ -41,19 +41,18 @@ export const consultationRoutes = new Elysia({ prefix: "/api/consultation" })
         const file = (body as any)?.audio;
         const stt = getSTTProvider();
 
-        if (file && file instanceof Blob) {
-          const arrayBuffer = await file.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
-          const result = await stt.transcribe(buffer, file.type || "audio/webm", {
-            filename: (file as any).name || "recording.webm",
-            language: "id",
-          });
-          return result;
+        if (!file || !(file instanceof Blob)) {
+          set.status = 400;
+          return { error: "Field 'audio' (file) wajib diisi." };
         }
 
-        // Jika tidak ada file audio atau mode mock
-        const mockResult = await stt.transcribe(new Uint8Array(), "audio/webm");
-        return mockResult;
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const result = await stt.transcribe(buffer, file.type || "audio/webm", {
+          filename: (file as any).name || "recording.webm",
+          language: "id",
+        });
+        return result;
       } catch (err: any) {
         set.status = 500;
         return { error: err.message || "Gagal melakukan transkripsi audio." };
@@ -66,7 +65,11 @@ export const consultationRoutes = new Elysia({ prefix: "/api/consultation" })
     "/deidentify",
     ({ body, set }) => {
       try {
-        const text = (body as any)?.text || "";
+        const text = (body as any)?.text;
+        if (typeof text !== "string" || text.trim() === "") {
+          set.status = 400;
+          return { error: "Field 'text' (string tidak kosong) wajib diisi." };
+        }
         return deidentificationService.deidentify(text);
       } catch (err: any) {
         set.status = 500;
@@ -85,7 +88,11 @@ export const consultationRoutes = new Elysia({ prefix: "/api/consultation" })
     "/autofill",
     async ({ body, set }) => {
       try {
-        const text = (body as any)?.text || "";
+        const text = (body as any)?.text;
+        if (typeof text !== "string" || text.trim() === "") {
+          set.status = 400;
+          return { error: "Field 'text' (string tidak kosong) wajib diisi." };
+        }
         const llm = getLLMProvider();
 
         const prompt = `Ekstrak percakapan konsultasi klinis berikut menjadi struktur SOAP medis terstandar:\n\n${text}`;
@@ -133,12 +140,11 @@ export const consultationRoutes = new Elysia({ prefix: "/api/consultation" })
             language: "id",
           });
           transcriptText = sttResult.text;
-        } else if (textInput && typeof textInput === "string") {
+        } else if (textInput && typeof textInput === "string" && textInput.trim() !== "") {
           transcriptText = textInput;
         } else {
-          // Fallback sample mock
-          const sttResult = await stt.transcribe(new Uint8Array(), "audio/webm");
-          transcriptText = sttResult.text;
+          set.status = 400;
+          return { error: "Wajib kirim salah satu: field 'audio' (file) atau field 'text' (string tidak kosong)." };
         }
 
         // Tahap 2: Deidentifikasi Privasi PII

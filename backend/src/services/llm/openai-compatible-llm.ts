@@ -4,24 +4,39 @@ import { CLINICAL_EXTRACTION_SYSTEM_PROMPT } from "../clinical-prompts";
 export class OpenAICompatibleLLMProvider implements LLMProvider {
   constructor(
     public name: string,
-    private apiKey: string,
-    private baseUrl: string = "https://api.openai.com/v1",
-    private model: string = "gpt-4o-mini"
+    private apiKey?: string,
+    private baseUrl?: string,
+    private model?: string
   ) {}
 
-  async generateText(prompt: string, options?: LLMGenerateOptions): Promise<string> {
+  private getValidConfig(): { apiKey: string; baseUrl: string; model: string } {
     if (!this.apiKey) {
-      throw new Error(`${this.name.toUpperCase()}_API_KEY is not configured.`);
+      throw new Error("LLM_API_KEY is not configured.");
     }
+    if (!this.baseUrl) {
+      throw new Error("LLM_BASE_URL is not configured.");
+    }
+    if (!this.model) {
+      throw new Error("LLM_MODEL is not configured.");
+    }
+    return {
+      apiKey: this.apiKey,
+      baseUrl: this.baseUrl,
+      model: this.model,
+    };
+  }
 
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
+  async generateText(prompt: string, options?: LLMGenerateOptions): Promise<string> {
+    const { apiKey, baseUrl, model } = this.getValidConfig();
+
+    const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: this.model,
+        model,
         messages: [
           { role: "system", content: CLINICAL_EXTRACTION_SYSTEM_PROMPT },
           { role: "user", content: prompt },
@@ -44,19 +59,17 @@ export class OpenAICompatibleLLMProvider implements LLMProvider {
     schemaGuidance?: string,
     options?: LLMGenerateOptions
   ): Promise<T> {
-    if (!this.apiKey) {
-      throw new Error(`${this.name.toUpperCase()}_API_KEY is not configured.`);
-    }
+    const { apiKey, baseUrl, model } = this.getValidConfig();
 
     const fullPrompt = `${prompt}\n\n${schemaGuidance || ""}`;
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: this.model,
+        model,
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: CLINICAL_EXTRACTION_SYSTEM_PROMPT },

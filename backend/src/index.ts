@@ -6,7 +6,7 @@ import { consultationRoutes } from "./routes/consultation";
 const app = new Elysia()
   .use(
     cors({
-      origin: [config.corsOrigin, "http://localhost:3000"],
+      origin: [config.corsOrigin],
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
     })

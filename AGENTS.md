@@ -33,6 +33,7 @@ playitplus/
 │   └── package.json     # Konfigurasi dependency Bun & script
 ├── .gitignore           # File ignore global Git
 ├── AGENTS.md            # Panduan global ini
+└── package.json         # Root scripts (bun run:frontend, bun run:backend)
 ```
 
 ---
@@ -68,8 +69,14 @@ Sebelum kode di-push ke remote repository Git, hook `.husky/pre-push` secara oto
 
 Jika ada salah satu tahapan yang gagal, perintah `git push` akan **dibatalkan**.
 
-### C. Package Manager
+### C. Package Manager & Menjalankan Proyek
 - Gunakan selalu **`bun`** (bukan `npm` atau `yarn`) untuk seluruh repositori (`frontend/` dan `backend/`).
+- Dari root direktori proyek, Anda dapat langsung menjalankan:
+  - `bun run:frontend` : Menjalankan dev server frontend Next.js (port 3000)
+  - `bun run:backend`  : Menjalankan dev server backend Elysia (port 3001)
+  - `bun build:frontend` : Melakukan build frontend Next.js
+  - `bun build:backend`  : Melakukan build backend Elysia
+  - `bun validate:lg`    : Memvalidasi kepatuhan kelas Tailwind desktop arbitrary px
 
 ---
 

@@ -4,19 +4,34 @@ export class UnifiedSTTProvider implements STTProvider {
   name = "unified";
 
   constructor(
-    private apiKey: string,
-    private baseUrl: string = "https://api.groq.com/openai/v1",
-    private model: string = "whisper-large-v3-turbo"
+    private apiKey?: string,
+    private baseUrl?: string,
+    private model?: string
   ) {}
+
+  private getValidConfig(): { apiKey: string; baseUrl: string; model: string } {
+    if (!this.apiKey) {
+      throw new Error("STT_API_KEY is not configured.");
+    }
+    if (!this.baseUrl) {
+      throw new Error("STT_BASE_URL is not configured.");
+    }
+    if (!this.model) {
+      throw new Error("STT_MODEL is not configured.");
+    }
+    return {
+      apiKey: this.apiKey,
+      baseUrl: this.baseUrl,
+      model: this.model,
+    };
+  }
 
   async transcribe(
     audioData: Blob | Buffer | Uint8Array,
     mimeType: string,
     options?: STTTranscriptionOptions
   ): Promise<STTTranscriptionResult> {
-    if (!this.apiKey) {
-      throw new Error("STT_API_KEY is not configured.");
-    }
+    const { apiKey, baseUrl, model } = this.getValidConfig();
 
     const filename = options?.filename || "recording.webm";
     const blob =
@@ -26,10 +41,10 @@ export class UnifiedSTTProvider implements STTProvider {
 
     const formData = new FormData();
     formData.append("file", blob, filename);
-    formData.append("model", this.model);
+    formData.append("model", model);
     formData.append("language", options?.language || "id");
 
-    const cleanBaseUrl = this.baseUrl.replace(/\/+$/, "");
+    const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
     const endpoint = cleanBaseUrl.endsWith("/audio/transcriptions")
       ? cleanBaseUrl
       : `${cleanBaseUrl}/audio/transcriptions`;
