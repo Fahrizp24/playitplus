@@ -1,6 +1,6 @@
 import { deidentificationService } from "../../utils/deidentification";
 import { getLLMProvider, SOAP_JSON_SCHEMA_GUIDE } from "../../utils/llm";
-import { getSTTProvider, SAMPLE_CONSULTATION_TRANSCRIPTS } from "../../utils/stt";
+import { getSTTProvider } from "../../utils/stt";
 import type {
   AudioMetadata,
   ConsultationProcessResult,
@@ -12,7 +12,7 @@ import type {
 export class ConsultationService {
   getSamples(): ConsultationSamplesResponse {
     return {
-      samples: SAMPLE_CONSULTATION_TRANSCRIPTS,
+      samples: [],
     };
   }
 

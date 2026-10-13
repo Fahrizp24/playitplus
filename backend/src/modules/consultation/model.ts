@@ -26,7 +26,6 @@ export const DeidentificationResultSchema = t.Object({
   metadata: t.Object({
     totalRedacted: t.Number(),
     typesFound: t.Array(t.String()),
-    isMock: t.Optional(t.Boolean()),
   }),
 });
 
