@@ -136,19 +136,16 @@ export function SimrsRecordingModal({
             </div>
           )}
 
-          {/* Big Record Button & Wave */}
+          {/* Big Record Button */}
           <div className="relative my-2 lg:my-[8px]">
-            {isRecording && (
-              <span className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-25" />
-            )}
             <button
               type="button"
               onClick={isRecording ? handleStopRecording : handleStartRecording}
               disabled={isProcessing}
-              className={`relative flex items-center justify-center w-20 h-20 rounded-full text-white shadow-lg transition-transform active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed lg:w-[88px] lg:h-[88px] ${
+              className={`relative flex items-center justify-center w-20 h-20 rounded-full text-white transition-transform active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed lg:w-[88px] lg:h-[88px] ${
                 isRecording
-                  ? "bg-red-600 hover:bg-red-700 shadow-red-500/30"
-                  : "bg-blue-600 hover:bg-blue-700 shadow-blue-500/30"
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
               <svg className="w-9 h-9 lg:w-[38px] lg:h-[38px]" fill="currentColor" viewBox="0 0 24 24">

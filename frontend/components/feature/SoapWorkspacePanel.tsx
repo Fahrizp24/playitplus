@@ -159,7 +159,6 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
             <Button
               type="button"
               variant={isSignedOff ? "secondary" : "primary"}
-              size="sm"
               onClick={() => setIsSignedOff(!isSignedOff)}
             >
               {isSignedOff ? "Batal Sah" : "Sahkan Catatan"}
@@ -268,47 +267,51 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
 
         {/* Tab Content 2: Patient Summary */}
         {activeTab === "patientSummary" && (
-          <div className="flex flex-col gap-3.5 p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 lg:p-[16px] lg:rounded-[12px] lg:gap-[14px] lg:text-[13px]">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-900 text-sm lg:text-[14px]">Format Pesan Pasien</span>
-              <Button type="button" variant="primary" size="sm" onClick={handleCopyWhatsApp}>
-                {copiedWA ? "Tersalin!" : "Salin Pesan WhatsApp"}
-              </Button>
-            </div>
+          <div className="flex flex-col gap-3.5 text-xs text-slate-800 lg:gap-[14px] lg:text-[13px]">
+            <div className="flex flex-col p-4 bg-slate-50 border border-slate-200 rounded-xl lg:p-[16px] lg:rounded-[12px]">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 pb-2 border-b border-slate-200 lg:mb-[12px] lg:pb-[8px] lg:gap-[12px]">
+                <h4 className="text-sm font-bold text-slate-900 lg:text-[14px]">
+                  Format Pesan Pasien
+                </h4>
+                <Button type="button" variant="primary" onClick={handleCopyWhatsApp}>
+                  {copiedWA ? "Tersalin!" : "Salin Pesan WhatsApp"}
+                </Button>
+              </div>
 
-            <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2 lg:p-[14px] lg:space-y-[8px]">
-              {patientSummary.facilityName && (
-                <p><strong>Fasilitas:</strong> {patientSummary.facilityName}</p>
-              )}
-              <p><strong>Tanggal:</strong> {formatDisplayDate(patientSummary.date)}</p>
-              {patientSummary.doctorName && (
-                <p><strong>Dokter:</strong> {patientSummary.doctorName}</p>
-              )}
-              <p><strong>Kesimpulan:</strong> {patientSummary.simpleConclusion}</p>
-              <div>
-                <strong>Petunjuk Obat:</strong>
-                <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
-                  {patientSummary.medicationInstructions.map((m: string, idx: number) => (
-                    <li key={idx}>{m}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <strong>Anjuran:</strong>
-                <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
-                  {patientSummary.lifestyleAdvice.map((a: string, idx: number) => (
-                    <li key={idx}>{a}</li>
-                  ))}
-                </ul>
-              </div>
-              <p><strong>Jadwal Kontrol:</strong> {patientSummary.controlSchedule}</p>
-              <div>
-                <strong>Tanda Bahaya:</strong>
-                <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
-                  {patientSummary.emergencySigns.map((s: string, idx: number) => (
-                    <li key={idx}>{s}</li>
-                  ))}
-                </ul>
+              <div className="space-y-2 lg:space-y-[8px]">
+                {patientSummary.facilityName && (
+                  <p><strong>Fasilitas:</strong> {patientSummary.facilityName}</p>
+                )}
+                <p><strong>Tanggal:</strong> {formatDisplayDate(patientSummary.date)}</p>
+                {patientSummary.doctorName && (
+                  <p><strong>Dokter:</strong> {patientSummary.doctorName}</p>
+                )}
+                <p><strong>Kesimpulan:</strong> {patientSummary.simpleConclusion}</p>
+                <div>
+                  <strong>Petunjuk Obat:</strong>
+                  <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
+                    {patientSummary.medicationInstructions.map((m: string, idx: number) => (
+                      <li key={idx}>{m}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <strong>Anjuran:</strong>
+                  <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
+                    {patientSummary.lifestyleAdvice.map((a: string, idx: number) => (
+                      <li key={idx}>{a}</li>
+                    ))}
+                  </ul>
+                </div>
+                <p><strong>Jadwal Kontrol:</strong> {patientSummary.controlSchedule}</p>
+                <div>
+                  <strong>Tanda Bahaya:</strong>
+                  <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
+                    {patientSummary.emergencySigns.map((s: string, idx: number) => (
+                      <li key={idx}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
