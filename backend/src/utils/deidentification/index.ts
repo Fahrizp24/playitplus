@@ -1,5 +1,26 @@
-export interface PIIRule {
+export interface PIIEntity {
+  id: string;
   type: "NAME" | "NIK" | "PHONE" | "DOB" | "ADDRESS" | "MEDICAL_RECORD_NO";
+  label: string;
+  originalText: string;
+  replacement: string;
+  start: number;
+  end: number;
+}
+
+export interface DeidentificationResult {
+  originalText: string;
+  deidentifiedText: string;
+  entities: PIIEntity[];
+  metadata: {
+    totalRedacted: number;
+    typesFound: string[];
+    isMock?: boolean;
+  };
+}
+
+export interface PIIRule {
+  type: PIIEntity["type"];
   label: string;
   regex: RegExp;
   replacementGenerator: (match: string, group?: string) => string;
@@ -72,3 +93,75 @@ export const INDONESIAN_PII_RULES: PIIRule[] = [
     },
   },
 ];
+
+export class DeidentificationService {
+  deidentify(text: string): DeidentificationResult {
+    if (!text || text.trim() === "") {
+      return {
+        originalText: text,
+        deidentifiedText: text,
+        entities: [],
+        metadata: {
+          totalRedacted: 0,
+          typesFound: [],
+        },
+      };
+    }
+
+    const matches: PIIEntity[] = [];
+
+    for (const rule of INDONESIAN_PII_RULES) {
+      const regex = new RegExp(rule.regex.source, rule.regex.flags);
+      let match: RegExpExecArray | null;
+
+      while ((match = regex.exec(text)) !== null) {
+        const fullMatch = match[0];
+        const start = match.index;
+        const end = start + fullMatch.length;
+        const replacement = rule.replacementGenerator(fullMatch);
+
+        const isOverlapping = matches.some(
+          (m) => (start >= m.start && start < m.end) || (end > m.start && end <= m.end)
+        );
+
+        if (!isOverlapping) {
+          matches.push({
+            id: `pii-${matches.length + 1}`,
+            type: rule.type,
+            label: rule.label,
+            originalText: fullMatch,
+            replacement,
+            start,
+            end,
+          });
+        }
+      }
+    }
+
+    matches.sort((a, b) => a.start - b.start);
+
+    let deidentifiedText = "";
+    let currentIndex = 0;
+
+    for (const entity of matches) {
+      deidentifiedText += text.substring(currentIndex, entity.start);
+      deidentifiedText += entity.replacement;
+      currentIndex = entity.end;
+    }
+    deidentifiedText += text.substring(currentIndex);
+
+    const typesFound = Array.from(new Set(matches.map((m) => m.type)));
+
+    return {
+      originalText: text,
+      deidentifiedText,
+      entities: matches,
+      metadata: {
+        totalRedacted: matches.length,
+        typesFound,
+      },
+    };
+  }
+}
+
+export const deidentificationService = new DeidentificationService();

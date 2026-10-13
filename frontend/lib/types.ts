@@ -1,107 +1,38 @@
-export interface PIIEntity {
-  id: string;
-  type: "NAME" | "NIK" | "PHONE" | "DOB" | "ADDRESS" | "MEDICAL_RECORD_NO";
-  label: string;
-  originalText: string;
-  replacement: string;
-  start: number;
-  end: number;
-}
+import type { eden } from "./api/eden";
 
-export interface DeidentificationResult {
-  originalText: string;
-  deidentifiedText: string;
-  entities: PIIEntity[];
-  metadata: {
-    totalRedacted: number;
-    typesFound: string[];
-    isMock?: boolean;
-  };
-}
+/**
+ * Tipe-tipe aplikasi diturunkan langsung dari Eden Client (Elysia Backend Schema).
+ * Menjamin 100% end-to-end type safety tanpa duplikasi manual.
+ */
 
-export interface TraceableQuote {
-  quote: string;
-  sourceSpeaker?: "Dokter" | "Pasien" | "Pendamping";
-  context?: string;
-}
+// 1. Consultation Types
+export type ConsultationSamplesResponse = NonNullable<
+  Awaited<ReturnType<typeof eden.api.consultation.samples.get>>["data"]
+>;
 
-export interface Medication {
-  name: string;
-  dosage: string;
-  frequency: string;
-  duration: string;
-  instructions?: string;
-}
+export type ConsultationSampleItem = ConsultationSamplesResponse["samples"][number];
 
-export interface SOAPData {
-  subjective: {
-    chiefComplaint: string;
-    historyOfPresentIllness: string;
-    pastMedicalHistory?: string;
-    familyMedicalHistory?: string;
-    allergies: {
-      status: "DISANGKAL" | "TERDAPAT" | "TIDAK_DISEBUTKAN" | "PERLU_KONFIRMASI";
-      details?: string;
-    };
-    evidence: TraceableQuote[];
-  };
-  objective: {
-    vitalSigns?: {
-      bloodPressure?: string;
-      heartRate?: string;
-      temperature?: string;
-      respiratoryRate?: string;
-    };
-    physicalExamFindings: string;
-    evidence: TraceableQuote[];
-  };
-  assessment: {
-    primaryDiagnosis: string;
-    differentialDiagnosis?: string[];
-    clinicalCertainty: "PASTI" | "DUGAAN_KERJA" | "PERLU_PEMERIKSAAN_LANJUT";
-    evidence: TraceableQuote[];
-  };
-  plan: {
-    medications: Medication[];
-    diagnosticOrders?: string[];
-    patientEducation: string[];
-    contraindicationsOrRestrictions?: string[];
-    followUpPlan: string;
-    emergencyRedFlags: string[];
-    evidence: TraceableQuote[];
-  };
-  patientSummary: {
-    facilityName?: string;
-    doctorName?: string;
-    date: string;
-    simpleConclusion: string;
-    medicationInstructions: string[];
-    lifestyleAdvice: string[];
-    thingsToAvoid: string[];
-    controlSchedule: string;
-    emergencySigns: string[];
-  };
-  uncertainties: Array<{
-    issue: string;
-    reason: "AMBIGU" | "TIDAK_LENGKAP" | "KONFLIK" | "PERLU_KONFIRMASI_DOKTER";
-    suggestedAction: string;
-  }>;
-}
+export type ConsultationProcessResult = NonNullable<
+  Awaited<ReturnType<typeof eden.api.consultation.process.post>>["data"]
+>;
 
-export interface ConsultationProcessResult {
-  id: string;
-  createdAt: string;
-  audioMetadata?: {
-    filename?: string;
-    sizeBytes?: number;
-    mimeType?: string;
-    durationSeconds?: number;
-  };
-  stt: {
-    providerUsed: string;
-    transcript: string;
-    durationSeconds?: number;
-  };
-  deidentification: DeidentificationResult;
-  soap: SOAPData;
-}
+export type DeidentificationResult = ConsultationProcessResult["deidentification"];
+export type PIIEntity = DeidentificationResult["entities"][number];
+
+export type SOAPData = ConsultationProcessResult["soap"];
+export type TraceableQuote = SOAPData["subjective"]["evidence"][number];
+export type Medication = SOAPData["plan"]["medications"][number];
+
+// 2. Auth Types
+export type AuthResponse = NonNullable<
+  Awaited<ReturnType<typeof eden.api.auth.login.post>>["data"]
+>;
+
+export type SessionUser = NonNullable<
+  Awaited<ReturnType<typeof eden.api.auth.me.get>>["data"]
+>;
+
+// 3. User Types
+export type UserProfile = NonNullable<
+  Awaited<ReturnType<typeof eden.api.user.profile.get>>["data"]
+>;

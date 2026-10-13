@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import type { SOAPData, TraceableQuote } from "@/lib/types";
+import type { Medication, SOAPData, TraceableQuote } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
@@ -11,6 +11,22 @@ interface SoapWorkspacePanelProps {
   activeQuote: string | null;
   activeTab?: "soap" | "patientSummary";
   onTabChange?: (tab: "soap" | "patientSummary") => void;
+}
+
+function formatDisplayDate(val: unknown): string {
+  if (!val) return "-";
+  if (val instanceof Date) {
+    try {
+      return new Intl.DateTimeFormat("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(val);
+    } catch {
+      return val.toISOString().split("T")[0];
+    }
+  }
+  return String(val);
 }
 
 export function SoapWorkspacePanel({
@@ -39,27 +55,28 @@ export function SoapWorkspacePanel({
   const handleCopyWhatsApp = () => {
     const facilityPrefix = patientSummary.facilityName ? `*${patientSummary.facilityName}*\n` : "";
     const doctorPrefix = patientSummary.doctorName ? `Dokter: ${patientSummary.doctorName}\n` : "";
+    const formattedDate = formatDisplayDate(patientSummary.date);
 
     const text = `${facilityPrefix}Ringkasan Konsultasi Medis
-Tanggal: ${patientSummary.date}
+Tanggal: ${formattedDate}
 ${doctorPrefix}
 *1. Kesimpulan:*
 ${patientSummary.simpleConclusion}
 
 *2. Instruksi Obat:*
-${patientSummary.medicationInstructions.map((m) => `• ${m}`).join("\n")}
+${patientSummary.medicationInstructions.map((m: string) => `• ${m}`).join("\n")}
 
 *3. Anjuran:*
-${patientSummary.lifestyleAdvice.map((a) => `• ${a}`).join("\n")}
+${patientSummary.lifestyleAdvice.map((a: string) => `• ${a}`).join("\n")}
 
 *4. Hal yang Perlu Dihindari:*
-${patientSummary.thingsToAvoid.map((t) => `• ${t}`).join("\n")}
+${patientSummary.thingsToAvoid.map((t: string) => `• ${t}`).join("\n")}
 
 *5. Rencana Kontrol:*
 ${patientSummary.controlSchedule}
 
 *6. Tanda Bahaya:*
-${patientSummary.emergencySigns.map((s) => `• ${s}`).join("\n")}
+${patientSummary.emergencySigns.map((s: string) => `• ${s}`).join("\n")}
 
 _Pesan ini merupakan ringkasan informasi konsultasi._`;
 
@@ -221,7 +238,7 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
                   <div>
                     <strong>Instruksi Obat:</strong>
                     <ul className="list-disc list-inside mt-1 lg:mt-[4px]">
-                      {plan.medications.map((m, idx) => (
+                      {plan.medications.map((m: Medication, idx: number) => (
                         <li key={idx}>
                           {m.name} - {m.dosage} ({m.frequency}, {m.duration})
                         </li>
@@ -241,7 +258,7 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
             {uncertainties && uncertainties.length > 0 && (
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 lg:p-[12px] lg:rounded-[10px]">
                 <strong className="block mb-1 lg:mb-[4px]">Perlu Konfirmasi Dokter:</strong>
-                {uncertainties.map((u, i) => (
+                {uncertainties.map((u, i: number) => (
                   <p key={i}>• {u.issue} ({u.reason}): {u.suggestedAction}</p>
                 ))}
               </div>
@@ -263,7 +280,7 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
               {patientSummary.facilityName && (
                 <p><strong>Fasilitas:</strong> {patientSummary.facilityName}</p>
               )}
-              <p><strong>Tanggal:</strong> {patientSummary.date}</p>
+              <p><strong>Tanggal:</strong> {formatDisplayDate(patientSummary.date)}</p>
               {patientSummary.doctorName && (
                 <p><strong>Dokter:</strong> {patientSummary.doctorName}</p>
               )}
@@ -271,7 +288,7 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
               <div>
                 <strong>Petunjuk Obat:</strong>
                 <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
-                  {patientSummary.medicationInstructions.map((m, idx) => (
+                  {patientSummary.medicationInstructions.map((m: string, idx: number) => (
                     <li key={idx}>{m}</li>
                   ))}
                 </ul>
@@ -279,7 +296,7 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
               <div>
                 <strong>Anjuran:</strong>
                 <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
-                  {patientSummary.lifestyleAdvice.map((a, idx) => (
+                  {patientSummary.lifestyleAdvice.map((a: string, idx: number) => (
                     <li key={idx}>{a}</li>
                   ))}
                 </ul>
@@ -288,7 +305,7 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
               <div>
                 <strong>Tanda Bahaya:</strong>
                 <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
-                  {patientSummary.emergencySigns.map((s, idx) => (
+                  {patientSummary.emergencySigns.map((s: string, idx: number) => (
                     <li key={idx}>{s}</li>
                   ))}
                 </ul>

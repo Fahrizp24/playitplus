@@ -12,6 +12,9 @@
     "prepare": "cd .. && bunx husky .husky"
   },
   "dependencies": {
+    "@elysiajs/eden": "^1.4.9",
+    "@tanstack/react-query": "^5.104.2",
+    "elysia": "1.4.30",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"

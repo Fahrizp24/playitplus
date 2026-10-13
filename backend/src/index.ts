@@ -1,9 +1,11 @@
 import { cors } from "@elysiajs/cors";
 import { Elysia } from "elysia";
 import { config } from "./config";
-import { consultationRoutes } from "./routes/consultation";
+import { authController } from "./modules/auth";
+import { consultationController } from "./modules/consultation";
+import { userController } from "./modules/user";
 
-const app = new Elysia()
+export const app = new Elysia()
   .use(
     cors({
       origin: [config.corsOrigin],
@@ -16,7 +18,9 @@ const app = new Elysia()
     version: "0.1.0",
     docs: "/api/consultation/samples",
   }))
-  .use(consultationRoutes)
+  .use(authController)
+  .use(userController)
+  .use(consultationController)
   .listen(config.port);
 
 console.log(

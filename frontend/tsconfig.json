@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@backend/*": ["../backend/src/*"],
+      "elysia": ["./node_modules/elysia"]
     }
   },
   "include": [
