@@ -7,12 +7,7 @@ import { PipelineStepTracker, type PipelineStep } from "@/components/feature/Pip
 import { AudioInputSection } from "@/components/feature/AudioInputSection";
 import { TranscriptAndPrivacyPanel } from "@/components/feature/TranscriptAndPrivacyPanel";
 import { SoapWorkspacePanel } from "@/components/feature/SoapWorkspacePanel";
-import {
-  getProviderStatus,
-  getConsultationSamples,
-  processConsultationAudio,
-  processConsultationText,
-} from "@/lib/api";
+import { getConsultationRepository } from "@/lib/repositories";
 import type { DeidentificationResult, ProviderStatus, SOAPData } from "@/lib/types";
 
 export default function Home() {
@@ -27,14 +22,17 @@ export default function Home() {
   const [highlightQuote, setHighlightQuote] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const consultationRepo = getConsultationRepository();
+
   // Ambil status provider saat aplikasi dimuat
   useEffect(() => {
-    getProviderStatus()
+    consultationRepo
+      .getProviderStatus()
       .then((status) => setProviderStatus(status))
       .catch((err) => {
         console.warn("Backend belum menyala atau offline:", err);
       });
-  }, []);
+  }, [consultationRepo]);
 
   const handleProcessAudio = async (audioBlob: Blob, filename?: string) => {
     try {
@@ -43,8 +41,10 @@ export default function Home() {
       setCompletedSteps(["audio"]);
       setCurrentStep("stt");
 
-      // Panggil backend full-pipeline
-      const result = await processConsultationAudio(audioBlob, filename);
+      const audioFileName = filename && filename.trim() !== "" ? filename : "recording.webm";
+
+      // Panggil backend full-pipeline via Repository
+      const result = await consultationRepo.processAudio(audioBlob, audioFileName);
 
       setCurrentStep("deidentify");
       setCompletedSteps(["audio", "stt"]);
@@ -76,10 +76,13 @@ export default function Home() {
       setCurrentStep("stt");
       setCompletedSteps(["audio"]);
 
-      const samplesRes = await getConsultationSamples().catch(() => null);
-      const sampleText = samplesRes?.samples?.[0]?.text || "";
+      const samplesRes = await consultationRepo.getSamples().catch(() => null);
+      const sampleText = samplesRes?.samples?.[0]?.text;
+      if (!sampleText) {
+        throw new Error("Contoh percakapan klinis tidak ditemukan dari server.");
+      }
 
-      const result = await processConsultationText(sampleText);
+      const result = await consultationRepo.processText(sampleText);
 
       setCurrentStep("deidentify");
       setCompletedSteps(["audio", "stt"]);

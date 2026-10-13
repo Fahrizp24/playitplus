@@ -9,9 +9,10 @@ interface HeaderProps {
 }
 
 export function Header({ providerStatus }: HeaderProps) {
-  const sttProvider = providerStatus?.stt.configuredProvider || "mock";
-  const llmProvider = providerStatus?.llm.configuredProvider || "mock";
-  const llmModel = providerStatus?.llm.model || "claude-3.5-sonnet";
+  const isLoaded = Boolean(providerStatus);
+  const sttProvider = providerStatus?.stt.configuredProvider;
+  const llmProvider = providerStatus?.llm.configuredProvider;
+  const llmModel = providerStatus?.llm.model;
 
   return (
     <header className="w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-50 dark:border-zinc-800 dark:bg-zinc-950/80">
@@ -39,21 +40,33 @@ export function Header({ providerStatus }: HeaderProps) {
         {/* Unified / Agnostic Provider Status Pills */}
         <div className="flex items-center flex-wrap gap-2 text-xs lg:gap-[10px] lg:text-[12px]">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 lg:px-[12px] lg:py-[6px] lg:rounded-[8px] lg:gap-[6px]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 lg:w-[8px] lg:h-[8px]" />
+            <span
+              className={`w-2 h-2 rounded-full lg:w-[8px] lg:h-[8px] ${
+                isLoaded ? "bg-emerald-500" : "bg-amber-400 animate-pulse"
+              }`}
+            />
             <span className="text-zinc-500 font-medium dark:text-zinc-400">STT:</span>
             <span className="font-semibold uppercase text-zinc-900 dark:text-zinc-100">
-              {sttProvider}
+              {sttProvider ?? "Menghubungkan..."}
             </span>
           </div>
 
           <div
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 lg:px-[12px] lg:py-[6px] lg:rounded-[8px] lg:gap-[6px]"
-            title={`Model: ${llmModel}`}
+            title={llmModel ? `Model: ${llmModel}` : "Menghubungkan ke backend..."}
           >
-            <span className="w-2 h-2 rounded-full bg-blue-500 lg:w-[8px] lg:h-[8px]" />
+            <span
+              className={`w-2 h-2 rounded-full lg:w-[8px] lg:h-[8px] ${
+                isLoaded ? "bg-blue-500" : "bg-amber-400 animate-pulse"
+              }`}
+            />
             <span className="text-zinc-500 font-medium dark:text-zinc-400">LLM:</span>
             <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-              {llmProvider === "unified" ? `Unified (${llmModel.split("/").pop()})` : llmProvider.toUpperCase()}
+              {llmProvider
+                ? llmProvider === "unified"
+                  ? `Unified (${llmModel?.split("/").pop() ?? ""})`
+                  : llmProvider.toUpperCase()
+                : "Menghubungkan..."}
             </span>
           </div>
 
