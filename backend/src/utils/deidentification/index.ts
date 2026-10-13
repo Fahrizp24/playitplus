@@ -15,7 +15,6 @@ export interface DeidentificationResult {
   metadata: {
     totalRedacted: number;
     typesFound: string[];
-    isMock?: boolean;
   };
 }
 

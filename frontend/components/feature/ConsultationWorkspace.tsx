@@ -105,7 +105,7 @@ export function ConsultationWorkspace({
   const handleRunSample = async () => {
     const sampleText = samplesData?.samples?.[0]?.text;
     if (!sampleText) {
-      setErrorMessage("Sampel percakapan tidak ditemukan.");
+      setErrorMessage("Data dummy sampel telah dinonaktifkan di server. Silakan gunakan Rekam Suara atau Unggah Audio untuk menguji model AI secara langsung.");
       return;
     }
     textMutation.mutate(sampleText);
