@@ -5,7 +5,6 @@ import React, { useRef } from "react";
 interface SimrsModuleGridProps {
   onOpenRecord: () => void;
   onUploadFile: (file: File) => Promise<void>;
-  onRunSample: () => Promise<void>;
   onOpenIntegrationModal: () => void;
   isProcessing: boolean;
 }
@@ -13,7 +12,6 @@ interface SimrsModuleGridProps {
 export function SimrsModuleGrid({
   onOpenRecord,
   onUploadFile,
-  onRunSample,
   onOpenIntegrationModal,
   isProcessing,
 }: SimrsModuleGridProps) {
@@ -26,9 +24,6 @@ export function SimrsModuleGrid({
         break;
       case "upload":
         fileInputRef.current?.click();
-        break;
-      case "sample":
-        onRunSample();
         break;
       case "integration":
         onOpenIntegrationModal();
@@ -67,16 +62,6 @@ export function SimrsModuleGrid({
       ),
     },
     {
-      id: "sample",
-      title: "Simulasi Kasus",
-      desc: "Uji otomatis alur konsultasi",
-      icon: (
-        <svg className="w-6 h-6 sm:w-8 sm:h-8 lg:w-[32px] lg:h-[32px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-    },
-    {
       id: "integration",
       title: "Integrasi EMR",
       desc: "Format standar elektronik FHIR",
@@ -98,8 +83,8 @@ export function SimrsModuleGrid({
         className="hidden"
       />
 
-      {/* Action Hub Grid: 2x2 on Mobile, 4 columns on Desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-[18px]">
+      {/* Action Hub Grid: 1 col on mobile, 3 cols on sm and desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-[18px]">
         {modules.map((m) => (
           <button
             key={m.id}
