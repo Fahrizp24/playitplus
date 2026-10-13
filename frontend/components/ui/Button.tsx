@@ -30,12 +30,12 @@ export function Button({
         className={`group relative inline-block focus:outline-hidden disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${className}`}
         {...props}
       >
-        {/* Layer Bawah 3D (Dasar/Shadow Biru Gelap) */}
-        <span className="absolute inset-0 w-full h-full rounded-xl bg-blue-800 translate-y-1 transition-transform group-hover:translate-y-1.5 group-active:translate-y-0 lg:rounded-[10px]" />
+        {/* Layer Bawah 3D (Dasar/Shadow Tetap di Posisi Normal) */}
+        <span className="absolute inset-0 w-full h-full rounded-xl bg-blue-800 border border-blue-900/60 lg:rounded-[10px]" />
 
-        {/* Layer Atas 3D (Muka Tombol Biru Utama) */}
+        {/* Layer Atas 3D (Muka Tombol: Geser ke Kiri-Atas di State Awal & Hover, Pas ke Dasar Saat Diklik) */}
         <span
-          className={`relative inline-flex items-center justify-center font-bold rounded-xl bg-blue-600 group-hover:bg-blue-500 text-white border-t border-blue-400/40 shadow-xs transition-transform transform -translate-y-0.5 group-hover:-translate-y-1 group-active:translate-y-1 lg:rounded-[10px] ${sizeStyle}`}
+          className={`relative inline-flex items-center justify-center font-bold rounded-xl bg-blue-600 group-hover:bg-blue-500 text-white border-t border-l border-blue-400/40 shadow-xs transition-transform transform -translate-x-1 -translate-y-1 group-hover:-translate-x-1.5 group-hover:-translate-y-1.5 group-active:translate-x-0 group-active:translate-y-0 lg:rounded-[10px] ${sizeStyle}`}
         >
           {children}
         </span>
