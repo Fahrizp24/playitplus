@@ -44,7 +44,7 @@ export class HuggingFaceSpaceSTTProvider implements STTProvider {
     }
 
     const client = await Client.connect(endpoint, {
-      token,
+      token: token as `hf_${string}`,
     });
 
     HuggingFaceSpaceSTTProvider.cachedClient = client;
