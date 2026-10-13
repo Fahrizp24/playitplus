@@ -58,14 +58,14 @@ export const INDONESIAN_PII_RULES: PIIRule[] = [
   {
     type: "NAME",
     label: "Nama Tenaga Medis",
-    regex: /(?:Dokter|dr\.)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:,\s*Sp\.[A-Z]{2,4})?)/g,
+    regex: /(?:Dokter|dr\.)[ \t]+([A-Z][a-z]+(?:[ \t]+[A-Z][a-z]+)*(?:,[ \t]*Sp\.[A-Z]{2,4})?)/g,
     replacementGenerator: () => "Dokter [DOKTER]",
   },
   // 6. Nama Pasien dengan panggilan (Bapak X / Ibu X / Sdr X / Sdri X)
   {
     type: "NAME",
     label: "Nama Pasien",
-    regex: /(?:Bapak|Ibu|Sdr|Sdri|Tn|Ny|Nn)\.?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})/g,
+    regex: /(?:Bapak|Ibu|Sdr|Sdri|Tn|Ny|Nn)\.?[ \t]+([A-Z][a-z]+(?:[ \t]+[A-Z][a-z]+){1,3})/g,
     replacementGenerator: (match) => {
       const prefix = match.split(" ")[0];
       return `${prefix} [NAMA_PASIEN]`;
@@ -75,7 +75,7 @@ export const INDONESIAN_PII_RULES: PIIRule[] = [
   {
     type: "NAME",
     label: "Nama Pasien",
-    regex: /(?:atas nama|nama saya)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})/gi,
+    regex: /(?:atas nama|nama saya)[ \t]+([A-Z][a-z]+(?:[ \t]+[A-Z][a-z]+){1,3})/gi,
     replacementGenerator: (match) => {
       const prefix = match.split(" ")[0] + " " + match.split(" ")[1];
       return `${prefix} [NAMA_PASIEN]`;

@@ -23,9 +23,19 @@ export class ConsultationService {
   async diarizeTranscript(rawText: string): Promise<string> {
     if (!rawText || rawText.trim() === "") return rawText;
 
-    // Jika teks sudah memiliki format peran (Dokter/Pasien), gunakan langsung
-    if (/^(?:Dokter|Pasien|dr\.)\s*:/im.test(rawText)) {
-      return rawText;
+    // Jika teks sudah memiliki format peran (Dokter/Pasien), normalisasikan jeda baris antar aktor
+    const hasExistingRoles =
+      /(?:^|\b|\n|\r|[.?!:,;])\s*(?:[-*•\d.]+\s*)?(?:\*\*)?(?:Dokter|Pasien|dr\.)(?:\*\*)?\s*:/i.test(
+        rawText
+      );
+
+    if (hasExistingRoles) {
+      return rawText
+        .replace(
+          /(?:^|\b|\n|\r|[.?!:,;])\s*(?:[-*•\d.]+\s*)?(?:\*\*)?(Dokter|Pasien|Pendamping|dr\.)(?:\*\*)?\s*:\s*(?:\*\*)?/gi,
+          (match, role) => `\n${role.toLowerCase() === "dr." ? "Dokter" : role}: `
+        )
+        .trim();
     }
 
     try {
@@ -41,6 +51,10 @@ export class ConsultationService {
       const cleanDiarized = diarized
         .replace(/```(?:markdown|text)?/gi, "")
         .replace(/```/g, "")
+        .replace(
+          /(?:^|\n|\r|[.?!])\s*(?:[-*•\d.]+\s*)?(?:\*\*)?(Dokter|Pasien|Pendamping|dr\.)(?:\*\*)?\s*:\s*(?:\*\*)?/gi,
+          (match, role) => `\n${role.toLowerCase() === "dr." ? "Dokter" : role}: `
+        )
         .trim();
 
       return cleanDiarized || rawText;

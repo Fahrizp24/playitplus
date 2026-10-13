@@ -48,11 +48,59 @@ export function TranscriptAndPrivacyPanel({
     );
   };
 
-  const renderDialogue = (text: string, quoteToHighlight: string | null) => {
-    const lines = text.split("\n").filter((line) => line.trim().length > 0);
-    const hasSpeakers = lines.some((line) => /^(?:Dokter|Pasien|Pendamping):\s*/i.test(line));
+  const parseDialogueTurns = (rawText: string) => {
+    if (!rawText || rawText.trim() === "") return [];
 
-    if (!hasSpeakers) {
+    let clean = rawText.trim();
+    clean = clean.replace(/```(?:markdown|text)?/gi, "").replace(/```/g, "");
+
+    // Normalisasi semua variasi format peran:
+    // **Dokter:**, **Dokter**:
+    // - Dokter:, * Dokter:, 1. Dokter:
+    // dr.:, Dokter :
+    // Pemisahan inline dialogue turn ke baris baru
+    clean = clean.replace(
+      /(?:^|\b|\n|\r|[.?!:,;])\s*(?:[-*•\d.]+\s*)?(?:\*\*)?(Dokter|Pasien|Pendamping|dr\.)(?:\*\*)?\s*:\s*(?:\*\*)?/gi,
+      (match, role) => `\n${role.toLowerCase() === "dr." ? "Dokter" : role}: `
+    );
+
+    const lines = clean
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+
+    const turns: Array<{ role: "Dokter" | "Pasien" | "Pendamping"; speech: string }> = [];
+
+    for (const line of lines) {
+      const match = line.match(
+        /^(?:[-*•\d.]+\s*)?(?:\*\*)?(Dokter|Pasien|Pendamping|dr\.)(?:\*\*)?\s*:\s*(?:\*\*)?(.*)$/i
+      );
+
+      if (match) {
+        const rawRole = match[1].toLowerCase();
+        const role: "Dokter" | "Pasien" | "Pendamping" =
+          rawRole === "dr." || rawRole === "dokter"
+            ? "Dokter"
+            : rawRole === "pasien"
+            ? "Pasien"
+            : "Pendamping";
+
+        const speech = match[2].replace(/^\*+|\*+$/g, "").trim();
+        if (speech) {
+          turns.push({ role, speech });
+        }
+      } else if (turns.length > 0) {
+        turns[turns.length - 1].speech += " " + line;
+      }
+    }
+
+    return turns;
+  };
+
+  const renderDialogue = (text: string, quoteToHighlight: string | null) => {
+    const turns = parseDialogueTurns(text);
+
+    if (turns.length === 0) {
       return (
         <div className="whitespace-pre-wrap">
           {renderHighlightedText(text, quoteToHighlight)}
@@ -62,40 +110,29 @@ export function TranscriptAndPrivacyPanel({
 
     return (
       <div className="flex flex-col gap-2.5 lg:gap-[10px]">
-        {lines.map((line, idx) => {
-          const match = line.match(/^(Dokter|Pasien|Pendamping):\s*(.*)$/i);
-          if (match) {
-            const role = match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase();
-            const speech = match[2];
-            const isDoctor = role.toLowerCase() === "dokter";
-            const isPatient = role.toLowerCase() === "pasien";
-
-            return (
-              <div
-                key={idx}
-                className="flex items-start gap-2 p-2 rounded-lg bg-white/80 border border-slate-200/70 lg:p-[8px] lg:gap-[8px] lg:rounded-[6px]"
-              >
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 lg:px-[6px] lg:py-[2px] lg:text-[10px] lg:rounded-[4px] ${
-                    isDoctor
-                      ? "bg-blue-100 text-blue-700"
-                      : isPatient
-                      ? "bg-emerald-100 text-emerald-800"
-                      : "bg-purple-100 text-purple-800"
-                  }`}
-                >
-                  {role}
-                </span>
-                <div className="flex-1 leading-relaxed text-slate-800">
-                  {renderHighlightedText(speech, quoteToHighlight)}
-                </div>
-              </div>
-            );
-          }
+        {turns.map((turn, idx) => {
+          const isDoctor = turn.role === "Dokter";
+          const isPatient = turn.role === "Pasien";
 
           return (
-            <div key={idx} className="leading-relaxed text-slate-800">
-              {renderHighlightedText(line, quoteToHighlight)}
+            <div
+              key={idx}
+              className="flex items-start gap-2 p-2 rounded-lg bg-white/80 border border-slate-200/70 lg:p-[8px] lg:gap-[8px] lg:rounded-[6px]"
+            >
+              <span
+                className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 lg:px-[6px] lg:py-[2px] lg:text-[10px] lg:rounded-[4px] ${
+                  isDoctor
+                    ? "bg-blue-100 text-blue-700"
+                    : isPatient
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-purple-100 text-purple-800"
+                }`}
+              >
+                {turn.role}
+              </span>
+              <div className="flex-1 leading-relaxed text-slate-800">
+                {renderHighlightedText(turn.speech, quoteToHighlight)}
+              </div>
             </div>
           );
         })}
