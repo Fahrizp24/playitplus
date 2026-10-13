@@ -5,18 +5,29 @@ import {
   SOAP_JSON_SCHEMA_GUIDE,
 } from "../../utils/llm";
 import { getSTTProvider } from "../../utils/stt";
+import { DUMMY_CONSULTATION_QUEUE } from "./dummy-queue";
 import type {
   AudioMetadata,
   ConsultationProcessResult,
+  ConsultationQueueResponse,
   ConsultationSamplesResponse,
   DeidentificationResult,
   SOAPData,
 } from "./model";
 
 export class ConsultationService {
+  getQueue(): ConsultationQueueResponse {
+    return {
+      queue: DUMMY_CONSULTATION_QUEUE,
+    };
+  }
+
   getSamples(): ConsultationSamplesResponse {
     return {
-      samples: [],
+      samples: DUMMY_CONSULTATION_QUEUE.map((item) => ({
+        title: `${item.queueNumber} - ${item.patientName} (${item.clinicService})`,
+        text: item.transcript,
+      })),
     };
   }
 

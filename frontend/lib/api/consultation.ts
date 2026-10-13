@@ -1,6 +1,7 @@
 import { eden } from "./eden";
 import type {
   ConsultationProcessResult,
+  ConsultationQueueResponse,
   ConsultationSamplesResponse,
   DeidentificationResult,
   SOAPData,
@@ -16,6 +17,19 @@ function extractErrorMessage(errorValue: unknown, defaultMessage: string): strin
     return (errorValue as Record<string, unknown>).error as string;
   }
   return defaultMessage;
+}
+
+/**
+ * Mengambil daftar antrean pasien klinis lengkap dengan transkrip & ringkasan dari BE.
+ */
+export async function getConsultationQueue(): Promise<ConsultationQueueResponse> {
+  const { data, error } = await eden.api.consultation.queue.get();
+  if (error) {
+    throw new Error(
+      extractErrorMessage(error.value, "Gagal mengambil daftar antrean pasien.")
+    );
+  }
+  return data;
 }
 
 /**

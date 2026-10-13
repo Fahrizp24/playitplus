@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { SimrsModuleGrid } from "@/components/feature/SimrsModuleGrid";
 import { SimrsRecordingModal } from "@/components/feature/SimrsRecordingModal";
 import { SimrsIntegrationModal } from "@/components/feature/SimrsIntegrationModal";
+import { PatientQueueModal } from "@/components/feature/PatientQueueModal";
 import { TranscriptAndPrivacyPanel } from "@/components/feature/TranscriptAndPrivacyPanel";
 import { SoapWorkspacePanel } from "@/components/feature/SoapWorkspacePanel";
 import {
@@ -13,6 +14,7 @@ import {
   autofillConsultationSoap,
 } from "@/lib/api";
 import type {
+  ConsultationQueueItem,
   DeidentificationResult,
   SOAPData,
 } from "@/lib/types";
@@ -35,6 +37,7 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
 
   // Tab & Modal State
   const [activeSoapTab, setActiveSoapTab] = useState<"soap" | "patientSummary">("soap");
+  const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isIntegrationModalOpen, setIsIntegrationModalOpen] = useState(false);
 
@@ -46,7 +49,20 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
     }, 100);
   };
 
-  // 1. Alur Audio Bertahap: Transkrip -> Muncul Dulu -> Ekstraksi SOAP Muncul Belakangan
+  // 1. Alur Pemilihan Pasien Antrean SIMRS (Instan dari Backend)
+  const handleSelectQueuePatient = (patient: ConsultationQueueItem) => {
+    setIsQueueModalOpen(false);
+    setErrorMessage(null);
+    setIsTranscribing(false);
+    setIsGeneratingSoap(false);
+    setTranscript(patient.transcript);
+    setDeidentification(patient.deidentification);
+    setSoapData(patient.soap);
+    setHighlightQuote(null);
+    scrollToWorkspace();
+  };
+
+  // 2. Alur Audio Bertahap: Transkrip -> Muncul Dulu -> Ekstraksi SOAP Muncul Belakangan
   const handleProcessAudio = async (audioBlob: Blob, filename: string) => {
     setIsRecordModalOpen(false);
     setErrorMessage(null);
@@ -81,8 +97,6 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
       setIsGeneratingSoap(false);
     }
   };
-
-
 
   const isProcessing = isTranscribing || isGeneratingSoap;
   const processingStatusText = isTranscribing
@@ -135,8 +149,9 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
           </div>
         )}
 
-        {/* 2. Menu Modul Utama SIMRS (3 Action Cards: Rekam, Unggah, Integrasi) */}
+        {/* 2. Menu Modul Utama SIMRS (4 Action Cards: Antrean, Rekam, Unggah, Integrasi) */}
         <SimrsModuleGrid
+          onOpenQueue={() => setIsQueueModalOpen(true)}
           onOpenRecord={() => setIsRecordModalOpen(true)}
           onUploadFile={async (file) => handleProcessAudio(file, file.name)}
           onOpenIntegrationModal={() => setIsIntegrationModalOpen(true)}
@@ -190,6 +205,12 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
       <Footer />
 
       {/* 4. Modals */}
+      <PatientQueueModal
+        isOpen={isQueueModalOpen}
+        onClose={() => setIsQueueModalOpen(false)}
+        onSelectPatient={handleSelectQueuePatient}
+      />
+
       <SimrsRecordingModal
         isOpen={isRecordModalOpen}
         onClose={() => setIsRecordModalOpen(false)}

@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import {
   AutofillBodySchema,
   ConsultationProcessResultSchema,
+  ConsultationQueueResponseSchema,
   ConsultationSamplesResponseSchema,
   DeidentificationResultSchema,
   DeidentifyBodySchema,
@@ -10,7 +11,18 @@ import {
 import { consultationService } from "./service";
 
 export const consultationController = new Elysia({ prefix: "/api/consultation" })
-  // 1. Dapatkan daftar sample percakapan klinis
+  // 1. Dapatkan daftar antrean pasien klinis lengkap (dummy queue)
+  .get(
+    "/queue",
+    () => {
+      return consultationService.getQueue();
+    },
+    {
+      response: ConsultationQueueResponseSchema,
+    }
+  )
+
+  // 2. Dapatkan daftar sample percakapan klinis
   .get(
     "/samples",
     () => {

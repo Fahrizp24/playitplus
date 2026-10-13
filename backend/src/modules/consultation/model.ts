@@ -179,3 +179,27 @@ export const DeidentifyBodySchema = t.Object({
 export const AutofillBodySchema = t.Object({
   text: t.String({ minLength: 1 }),
 });
+
+export const ConsultationQueueItemSchema = t.Object({
+  id: t.String(),
+  queueNumber: t.String(),
+  patientName: t.String(),
+  patientAge: t.Number(),
+  gender: t.Union([t.Literal("Laki-laki"), t.Literal("Perempuan")]),
+  clinicService: t.String(),
+  chiefComplaint: t.String(),
+  status: t.String(),
+  estimatedTime: t.String(),
+  transcript: t.String(),
+  deidentification: DeidentificationResultSchema,
+  soap: SOAPDataSchema,
+});
+
+export type ConsultationQueueItem = Static<typeof ConsultationQueueItemSchema>;
+
+export const ConsultationQueueResponseSchema = t.Object({
+  queue: t.Array(ConsultationQueueItemSchema),
+});
+
+export type ConsultationQueueResponse = Static<typeof ConsultationQueueResponseSchema>;
+

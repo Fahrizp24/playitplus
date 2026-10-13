@@ -6,6 +6,12 @@ import type { eden } from "./api/eden";
  */
 
 // 1. Consultation Types
+export type ConsultationQueueResponse = NonNullable<
+  Awaited<ReturnType<typeof eden.api.consultation.queue.get>>["data"]
+>;
+
+export type ConsultationQueueItem = ConsultationQueueResponse["queue"][number];
+
 export type ConsultationSamplesResponse = NonNullable<
   Awaited<ReturnType<typeof eden.api.consultation.samples.get>>["data"]
 >;
