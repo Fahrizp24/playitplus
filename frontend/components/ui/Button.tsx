@@ -19,24 +19,19 @@ export function Button({
 
   switch (variant) {
     case "primary":
-      variantStyle =
-        "bg-blue-600 text-white hover:bg-blue-700 shadow-sm shadow-blue-500/20";
+      variantStyle = "bg-blue-600 text-white hover:bg-blue-700 shadow-xs";
       break;
     case "secondary":
-      variantStyle =
-        "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100";
+      variantStyle = "bg-slate-800 text-white hover:bg-slate-700";
       break;
     case "outline":
-      variantStyle =
-        "bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-800";
+      variantStyle = "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50";
       break;
     case "success":
-      variantStyle =
-        "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-500/20";
+      variantStyle = "bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs";
       break;
     case "danger":
-      variantStyle =
-        "bg-red-600 text-white hover:bg-red-700 shadow-sm shadow-red-500/20";
+      variantStyle = "bg-red-600 text-white hover:bg-red-700 shadow-xs";
       break;
   }
 
@@ -50,7 +45,7 @@ export function Button({
   return (
     <button
       disabled={disabled}
-      className={`inline-flex items-center justify-center font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed lg:rounded-[10px] ${variantStyle} ${sizeStyle} ${className}`}
+      className={`inline-flex items-center justify-center font-semibold rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed lg:rounded-[10px] ${variantStyle} ${sizeStyle} ${className}`}
       {...props}
     >
       {children}

@@ -105,18 +105,3 @@ export interface ConsultationProcessResult {
   deidentification: DeidentificationResult;
   soap: SOAPData;
 }
-
-export interface ProviderStatus {
-  stt: {
-    configuredProvider: string;
-    hasKey?: boolean;
-    baseUrl?: string;
-    model?: string;
-  };
-  llm: {
-    configuredProvider: string;
-    hasKey?: boolean;
-    baseUrl?: string;
-    model?: string;
-  };
-}

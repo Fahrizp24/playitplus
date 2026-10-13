@@ -1,71 +1,60 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { PipelineStepTracker, type PipelineStep } from "@/components/feature/PipelineStepTracker";
-import { AudioInputSection } from "@/components/feature/AudioInputSection";
+import { SimrsModuleGrid } from "@/components/feature/SimrsModuleGrid";
+import { SimrsRecordingModal } from "@/components/feature/SimrsRecordingModal";
+import { SimrsIntegrationModal } from "@/components/feature/SimrsIntegrationModal";
 import { TranscriptAndPrivacyPanel } from "@/components/feature/TranscriptAndPrivacyPanel";
 import { SoapWorkspacePanel } from "@/components/feature/SoapWorkspacePanel";
 import { getConsultationRepository } from "@/lib/repositories";
-import type { DeidentificationResult, ProviderStatus, SOAPData } from "@/lib/types";
+import type { DeidentificationResult, SOAPData } from "@/lib/types";
 
 export default function Home() {
-  const [providerStatus, setProviderStatus] = useState<ProviderStatus | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentStep, setCurrentStep] = useState<PipelineStep | null>(null);
-  const [completedSteps, setCompletedSteps] = useState<PipelineStep[]>([]);
+  const [processingStatusText, setProcessingStatusText] = useState<string>("");
 
+  // Data Konsultasi (Kosong saat awal, tanpa data dummy)
   const [transcript, setTranscript] = useState<string>("");
   const [deidentification, setDeidentification] = useState<DeidentificationResult | null>(null);
   const [soapData, setSoapData] = useState<SOAPData | null>(null);
   const [highlightQuote, setHighlightQuote] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Tab & Modal State
+  const [activeSoapTab, setActiveSoapTab] = useState<"soap" | "patientSummary">("soap");
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [isIntegrationModalOpen, setIsIntegrationModalOpen] = useState(false);
+
+  const workspaceRef = useRef<HTMLDivElement | null>(null);
   const consultationRepo = getConsultationRepository();
 
-  // Ambil status provider saat aplikasi dimuat
-  useEffect(() => {
-    consultationRepo
-      .getProviderStatus()
-      .then((status) => setProviderStatus(status))
-      .catch((err) => {
-        console.warn("Backend belum menyala atau offline:", err);
-      });
-  }, [consultationRepo]);
+  const scrollToWorkspace = () => {
+    setTimeout(() => {
+      workspaceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
 
-  const handleProcessAudio = async (audioBlob: Blob, filename?: string) => {
+  const handleProcessAudio = async (audioBlob: Blob, filename: string) => {
     try {
       setIsProcessing(true);
       setErrorMessage(null);
-      setCompletedSteps(["audio"]);
-      setCurrentStep("stt");
+      setProcessingStatusText("Mentranskripsikan audio & mengekstrak catatan medis...");
 
-      const audioFileName = filename && filename.trim() !== "" ? filename : "recording.webm";
+      const result = await consultationRepo.processAudio(audioBlob, filename);
 
-      // Panggil backend full-pipeline via Repository
-      const result = await consultationRepo.processAudio(audioBlob, audioFileName);
-
-      setCurrentStep("deidentify");
-      setCompletedSteps(["audio", "stt"]);
-
-      setCurrentStep("autofill");
-      setCompletedSteps(["audio", "stt", "deidentify"]);
-
-      // Simpan seluruh data state
       setTranscript(result.stt.transcript);
       setDeidentification(result.deidentification);
       setSoapData(result.soap);
-
-      setCompletedSteps(["audio", "stt", "deidentify", "autofill"]);
-      setCurrentStep(null);
+      scrollToWorkspace();
     } catch (err) {
       console.error("Gagal memproses audio:", err);
-      const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat memproses audio.";
+      const msg = err instanceof Error ? err.message : "Gagal memproses audio.";
       setErrorMessage(msg);
-      setCurrentStep(null);
     } finally {
       setIsProcessing(false);
+      setProcessingStatusText("");
     }
   };
 
@@ -73,36 +62,27 @@ export default function Home() {
     try {
       setIsProcessing(true);
       setErrorMessage(null);
-      setCurrentStep("stt");
-      setCompletedSteps(["audio"]);
+      setProcessingStatusText("Mengekstrak catatan medis dari kasus sampel...");
 
-      const samplesRes = await consultationRepo.getSamples().catch(() => null);
-      const sampleText = samplesRes?.samples?.[0]?.text;
+      const samplesRes = await consultationRepo.getSamples();
+      const sampleText = samplesRes.samples[0]?.text;
       if (!sampleText) {
-        throw new Error("Contoh percakapan klinis tidak ditemukan dari server.");
+        throw new Error("Contoh percakapan tidak ditemukan pada server.");
       }
 
       const result = await consultationRepo.processText(sampleText);
 
-      setCurrentStep("deidentify");
-      setCompletedSteps(["audio", "stt"]);
-
-      setCurrentStep("autofill");
-      setCompletedSteps(["audio", "stt", "deidentify"]);
-
       setTranscript(result.stt.transcript);
       setDeidentification(result.deidentification);
       setSoapData(result.soap);
-
-      setCompletedSteps(["audio", "stt", "deidentify", "autofill"]);
-      setCurrentStep(null);
+      scrollToWorkspace();
     } catch (err) {
       console.error("Gagal memproses sample:", err);
-      const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat memproses sample klinis.";
+      const msg = err instanceof Error ? err.message : "Gagal memproses sampel konsultasi.";
       setErrorMessage(msg);
-      setCurrentStep(null);
     } finally {
       setIsProcessing(false);
+      setProcessingStatusText("");
     }
   };
 
@@ -114,62 +94,114 @@ export default function Home() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-zinc-100/70 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50 flex flex-col">
-      <Header providerStatus={providerStatus} />
+  const handleResetConsultation = () => {
+    setTranscript("");
+    setDeidentification(null);
+    setSoapData(null);
+    setHighlightQuote(null);
+    setErrorMessage(null);
+  };
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5 lg:px-[32px] lg:py-[24px] lg:gap-[24px]">
-        {/* Error notification banner */}
+  const hasConsultationData = Boolean(soapData || transcript);
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 flex flex-col antialiased">
+      {/* 1. Header SIMRS (Tanpa data dummy dokter) */}
+      <Header
+        clinicName="Poliklinik Rawat Jalan"
+      />
+
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5 lg:px-[32px] lg:py-[20px] lg:gap-[20px]">
+        {/* Error Notification */}
         {errorMessage && (
-          <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 text-red-900 border border-red-200 text-xs dark:bg-red-950/50 dark:text-red-200 dark:border-red-900 lg:p-[16px] lg:text-[13px] lg:rounded-[12px]">
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-red-50 text-red-900 border border-red-200 text-xs shadow-xs lg:p-[14px] lg:text-[13px] lg:rounded-[10px]">
             <span>{errorMessage}</span>
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="font-bold underline ml-2 lg:ml-[8px]"
+              className="font-bold underline ml-2 cursor-pointer lg:ml-[8px]"
             >
               Tutup
             </button>
           </div>
         )}
 
-        {/* 1. Pipeline Step Tracker */}
-        <PipelineStepTracker
-          currentStep={currentStep}
+        {/* Processing Notification */}
+        {isProcessing && (
+          <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-blue-50 text-blue-900 border border-blue-200 text-xs shadow-xs animate-pulse lg:p-[14px] lg:text-[13px] lg:rounded-[10px] lg:gap-[10px]">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping lg:w-[8px] lg:h-[8px]" />
+            <span className="font-semibold">{processingStatusText ? processingStatusText : "Memproses..."}</span>
+          </div>
+        )}
+
+        {/* 2. Menu Modul Utama SIMRS (Item Besar Bersih & Seragam: Rekam, Unggah, Simulasi, Integrasi) */}
+        <SimrsModuleGrid
+          onOpenRecord={() => setIsRecordModalOpen(true)}
+          onUploadFile={async (file) => handleProcessAudio(file, file.name)}
+          onRunSample={handleUseSampleText}
+          onOpenIntegrationModal={() => setIsIntegrationModalOpen(true)}
           isProcessing={isProcessing}
-          completedSteps={completedSteps}
         />
 
-        {/* 2. Audio Input Section */}
-        <AudioInputSection
-          onProcessAudio={handleProcessAudio}
-          onUseSampleText={handleUseSampleText}
-          isProcessing={isProcessing}
-        />
+        {/* 3. Lembar Kerja Konsultasi (HANYA tampil jika data konsultasi ada atau sedang diproses) */}
+        {hasConsultationData && (
+          <div ref={workspaceRef} className="flex flex-col gap-4 mt-2 lg:gap-[16px] lg:mt-[8px]">
+            {/* Header Tindakan */}
+            <div className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-slate-200 shadow-xs lg:p-[14px] lg:rounded-[10px]">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 lg:text-[15px] lg:leading-[18px]">
+                  Dokumentasi Konsultasi Aktif
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={handleResetConsultation}
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition-colors cursor-pointer lg:px-[10px] lg:py-[5px] lg:text-[12px] lg:rounded-[6px]"
+              >
+                Tutup / Sesi Baru
+              </button>
+            </div>
 
-        {/* 3. Side-by-side or stacked panels: Transcript & Privacy + SOAP Workspace */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-[24px]">
-          {/* Left Column: STT & Deidentifikasi */}
-          <div className="lg:col-span-5 flex flex-col gap-5 lg:gap-[24px]">
-            <TranscriptAndPrivacyPanel
-              transcript={transcript}
-              deidentification={deidentification}
-              highlightQuote={highlightQuote}
-            />
-          </div>
+            {/* Panel Hasil: Kiri Transkrip & Sensor, Kanan SOAP & Ringkasan */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-[20px]">
+              <div className="lg:col-span-5 flex flex-col gap-4 lg:gap-[16px]">
+                <TranscriptAndPrivacyPanel
+                  transcript={transcript}
+                  deidentification={deidentification}
+                  highlightQuote={highlightQuote}
+                />
+              </div>
 
-          {/* Right Column: SOAP Clinical & Patient Summary Workspace */}
-          <div className="lg:col-span-7 flex flex-col gap-5 lg:gap-[24px]">
-            <SoapWorkspacePanel
-              soapData={soapData}
-              onSelectQuote={handleSelectQuote}
-              activeQuote={highlightQuote}
-            />
+              <div className="lg:col-span-7 flex flex-col gap-4 lg:gap-[16px]">
+                <SoapWorkspacePanel
+                  soapData={soapData}
+                  onSelectQuote={handleSelectQuote}
+                  activeQuote={highlightQuote}
+                  activeTab={activeSoapTab}
+                  onTabChange={setActiveSoapTab}
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </main>
 
       <Footer />
+
+      {/* 4. Modals */}
+      <SimrsRecordingModal
+        isOpen={isRecordModalOpen}
+        onClose={() => setIsRecordModalOpen(false)}
+        onSaveRecording={handleProcessAudio}
+        isProcessing={isProcessing}
+      />
+
+      <SimrsIntegrationModal
+        isOpen={isIntegrationModalOpen}
+        onClose={() => setIsIntegrationModalOpen(false)}
+        hasSoapData={Boolean(soapData)}
+        diagnosis={soapData ? soapData.assessment.primaryDiagnosis : undefined}
+      />
     </div>
   );
 }

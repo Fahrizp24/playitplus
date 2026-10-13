@@ -2,16 +2,9 @@ import {
   getConsultationRepository,
   type ConsultationSamplesResponse,
 } from "./repositories";
-import type { ConsultationProcessResult, ProviderStatus } from "./types";
+import type { ConsultationProcessResult } from "./types";
 
 export * from "./repositories";
-
-/**
- * Mengambil status koneksi & provider AI (STT & LLM) aktif dari backend.
- */
-export async function getProviderStatus(): Promise<ProviderStatus> {
-  return getConsultationRepository().getProviderStatus();
-}
 
 /**
  * Mengambil daftar preset sampel percakapan konsultasi klinis.

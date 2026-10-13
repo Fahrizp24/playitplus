@@ -1,4 +1,4 @@
-import type { ConsultationProcessResult, ProviderStatus } from "../types";
+import type { ConsultationProcessResult } from "../types";
 
 export interface ConsultationSampleItem {
   title: string;
@@ -13,7 +13,6 @@ export interface ConsultationSamplesResponse {
  * Interface Repository untuk alur konsultasi klinis, STT, deidentifikasi, dan SOAP.
  */
 export interface IConsultationRepository {
-  getProviderStatus(): Promise<ProviderStatus>;
   getSamples(): Promise<ConsultationSamplesResponse>;
   processAudio(audioBlob: Blob, filename: string): Promise<ConsultationProcessResult>;
   processText(text: string): Promise<ConsultationProcessResult>;
@@ -33,14 +32,6 @@ export class HttpConsultationRepository implements IConsultationRepository {
       );
     }
     this.baseUrl = baseUrl.replace(/\/+$/, "");
-  }
-
-  async getProviderStatus(): Promise<ProviderStatus> {
-    const res = await fetch(`${this.baseUrl}/api/consultation/status`);
-    if (!res.ok) {
-      throw new Error(`Gagal mengambil status provider AI (${res.status}).`);
-    }
-    return res.json();
   }
 
   async getSamples(): Promise<ConsultationSamplesResponse> {

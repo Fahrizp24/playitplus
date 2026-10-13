@@ -1,78 +1,104 @@
 "use client";
 
 import React from "react";
-import type { ProviderStatus } from "@/lib/types";
-import { Badge } from "@/components/ui/Badge";
 
 interface HeaderProps {
-  providerStatus: ProviderStatus | null;
+  doctorName?: string;
+  clinicName?: string;
 }
 
-export function Header({ providerStatus }: HeaderProps) {
-  const isLoaded = Boolean(providerStatus);
-  const sttProvider = providerStatus?.stt.configuredProvider;
-  const llmProvider = providerStatus?.llm.configuredProvider;
-  const llmModel = providerStatus?.llm.model;
+const emptySubscribe = () => () => {};
+
+function getTodayClientDate(): string {
+  try {
+    return new Intl.DateTimeFormat("id-ID", {
+      weekday: "long",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date());
+  } catch {
+    return "";
+  }
+}
+
+export function Header({
+  doctorName,
+  clinicName,
+}: HeaderProps) {
+  const todayFormatted = React.useSyncExternalStore(
+    emptySubscribe,
+    getTodayClientDate,
+    () => ""
+  );
 
   return (
-    <header className="w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-50 dark:border-zinc-800 dark:bg-zinc-950/80">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between lg:px-[32px] lg:py-[16px] lg:gap-[16px]">
-        {/* Brand & Title */}
+    <header className="w-full bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+      <div className="max-w-7xl w-full mx-auto px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between lg:px-[32px] lg:py-[14px] lg:gap-[16px]">
+        {/* Brand Header */}
         <div className="flex items-center gap-3 lg:gap-[14px]">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 text-white font-bold shadow-md shadow-blue-500/20 lg:w-[44px] lg:h-[44px] lg:rounded-[12px] lg:text-[18px]">
-            P+
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 text-white font-black shadow-sm lg:w-[42px] lg:h-[42px] lg:rounded-[12px] lg:text-[17px]">
+            +
           </div>
           <div>
             <div className="flex items-center gap-2 lg:gap-[8px]">
-              <h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 lg:text-[20px] lg:leading-[24px]">
-                PlayItPlus
+              <h1 className="text-base font-bold tracking-tight text-slate-900 lg:text-[18px] lg:leading-[22px]">
+                PlayItPlus <span className="text-blue-600 font-semibold">SIMRS</span>
               </h1>
-              <Badge variant="primary" size="sm">
-                MVP Flow
-              </Badge>
             </div>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 lg:text-[13px] lg:leading-[16px]">
-              Audio &rarr; STT &rarr; Deidentifikasi Privasi &rarr; Auto-Fill SOAP
-            </p>
+            {clinicName && (
+              <p className="text-xs text-slate-500 font-medium lg:text-[12px] lg:leading-[16px]">
+                {clinicName}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Unified / Agnostic Provider Status Pills */}
-        <div className="flex items-center flex-wrap gap-2 text-xs lg:gap-[10px] lg:text-[12px]">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 lg:px-[12px] lg:py-[6px] lg:rounded-[8px] lg:gap-[6px]">
-            <span
-              className={`w-2 h-2 rounded-full lg:w-[8px] lg:h-[8px] ${
-                isLoaded ? "bg-emerald-500" : "bg-amber-400 animate-pulse"
-              }`}
-            />
-            <span className="text-zinc-500 font-medium dark:text-zinc-400">STT:</span>
-            <span className="font-semibold uppercase text-zinc-900 dark:text-zinc-100">
-              {sttProvider ?? "Menghubungkan..."}
-            </span>
-          </div>
+        {/* Clean Essential Utilities */}
+        <div className="flex items-center flex-wrap gap-2.5 text-xs text-slate-600 lg:gap-[14px] lg:text-[13px]">
+          {/* Profil Dokter (Hanya tampil jika ada data riil) */}
+          {doctorName && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 lg:px-[12px] lg:py-[6px] lg:rounded-[8px] lg:gap-[8px]">
+              <svg
+                className="w-4 h-4 text-blue-600 lg:w-[16px] lg:h-[16px]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              <span className="font-semibold text-slate-900 text-[11px] lg:text-[12px]">
+                {doctorName}
+              </span>
+            </div>
+          )}
 
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 lg:px-[12px] lg:py-[6px] lg:rounded-[8px] lg:gap-[6px]"
-            title={llmModel ? `Model: ${llmModel}` : "Menghubungkan ke backend..."}
-          >
-            <span
-              className={`w-2 h-2 rounded-full lg:w-[8px] lg:h-[8px] ${
-                isLoaded ? "bg-blue-500" : "bg-amber-400 animate-pulse"
-              }`}
-            />
-            <span className="text-zinc-500 font-medium dark:text-zinc-400">LLM:</span>
-            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-              {llmProvider
-                ? llmProvider === "unified"
-                  ? `Unified (${llmModel?.split("/").pop() ?? ""})`
-                  : llmProvider.toUpperCase()
-                : "Menghubungkan..."}
-            </span>
-          </div>
-
-          <Badge variant="neutral" size="sm">
-            Unified / OpenRouter Ready
-          </Badge>
+          {/* Tanggal Layanan */}
+          {todayFormatted && (
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 lg:px-[12px] lg:py-[6px] lg:rounded-[8px] lg:gap-[6px]">
+              <svg
+                className="w-3.5 h-3.5 text-slate-400 lg:w-[14px] lg:h-[14px]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span className="text-[11px] font-medium lg:text-[12px]">
+                {todayFormatted}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </header>

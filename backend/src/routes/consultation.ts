@@ -15,25 +15,7 @@ export const consultationRoutes = new Elysia({ prefix: "/api/consultation" })
     };
   })
 
-  // 2. Info Status Provider Saat Ini (Agnostik Vendor)
-  .get("/status", () => {
-    return {
-      stt: {
-        configuredProvider: config.stt.provider,
-        hasKey: Boolean(config.stt.apiKey),
-        baseUrl: config.stt.baseUrl,
-        model: config.stt.model,
-      },
-      llm: {
-        configuredProvider: config.llm.provider,
-        hasKey: Boolean(config.llm.apiKey),
-        baseUrl: config.llm.baseUrl,
-        model: config.llm.model,
-      },
-    };
-  })
-
-  // 3. Endpoint STT Terpisah: Audio -> Transkripsi
+  // 2. Endpoint STT Terpisah: Audio -> Transkripsi
   .post(
     "/stt",
     async ({ body, set }) => {

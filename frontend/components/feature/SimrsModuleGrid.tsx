@@ -1,0 +1,140 @@
+"use client";
+
+import React, { useRef } from "react";
+
+interface SimrsModuleGridProps {
+  onOpenRecord: () => void;
+  onUploadFile: (file: File) => Promise<void>;
+  onRunSample: () => Promise<void>;
+  onOpenIntegrationModal: () => void;
+  isProcessing: boolean;
+}
+
+export function SimrsModuleGrid({
+  onOpenRecord,
+  onUploadFile,
+  onRunSample,
+  onOpenIntegrationModal,
+  isProcessing,
+}: SimrsModuleGridProps) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleModuleClick = (id: string) => {
+    switch (id) {
+      case "record":
+        onOpenRecord();
+        break;
+      case "upload":
+        fileInputRef.current?.click();
+        break;
+      case "sample":
+        onRunSample();
+        break;
+      case "integration":
+        onOpenIntegrationModal();
+        break;
+    }
+  };
+
+  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await onUploadFile(file);
+      e.target.value = "";
+    }
+  };
+
+  const modules = [
+    {
+      id: "record",
+      title: "Rekam Suara",
+      desc: "Anamnesis langsung via mikrofon",
+      icon: (
+        <svg className="w-8 h-8 lg:w-[32px] lg:h-[32px]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+        </svg>
+      ),
+    },
+    {
+      id: "upload",
+      title: "Unggah Audio",
+      desc: "Berkas rekaman MP3, WAV, WebM",
+      icon: (
+        <svg className="w-8 h-8 lg:w-[32px] lg:h-[32px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+      ),
+    },
+    {
+      id: "sample",
+      title: "Simulasi Kasus",
+      desc: "Uji otomatis alur konsultasi",
+      icon: (
+        <svg className="w-8 h-8 lg:w-[32px] lg:h-[32px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
+    },
+    {
+      id: "integration",
+      title: "Integrasi EMR",
+      desc: "Format standar elektronik FHIR",
+      icon: (
+        <svg className="w-8 h-8 lg:w-[32px] lg:h-[32px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4 lg:gap-[18px]">
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileInputChange}
+        accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg"
+        className="hidden"
+      />
+
+      {/* Sub-header Banner */}
+      <div className="flex items-center justify-between px-5 py-3 bg-blue-600 text-white rounded-xl shadow-xs lg:px-[20px] lg:py-[12px] lg:rounded-[10px]">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-white lg:text-[13px] lg:leading-[16px]">
+          Modul Poliklinik & Dokumentasi Medis
+        </h2>
+        <span className="text-xs text-blue-100 font-medium lg:text-[12px]">
+          Menu Utama
+        </span>
+      </div>
+
+      {/* Action Hub Grid: 4 Clean Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-[18px]">
+        {modules.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => handleModuleClick(m.id)}
+            disabled={isProcessing}
+            className="group flex flex-col items-center text-center p-6 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-blue-400 hover:-translate-y-0.5 transition-all w-full cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed lg:p-[24px] lg:rounded-[14px]"
+          >
+            {/* Emblem: Clean uniform blue styling */}
+            <div className="flex items-center justify-center w-16 h-16 rounded-full mb-3 bg-blue-50 text-blue-600 border border-blue-100 shadow-xs group-hover:scale-105 transition-transform lg:w-[64px] lg:h-[64px] lg:mb-[14px]">
+              {m.icon}
+            </div>
+
+            {/* Title */}
+            <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors lg:text-[15px] lg:leading-[18px]">
+              {m.title}
+            </h3>
+
+            {/* Subtitle */}
+            <p className="text-xs text-slate-500 mt-1 lg:text-[12px] lg:leading-[16px] lg:mt-[4px]">
+              {m.desc}
+            </p>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
