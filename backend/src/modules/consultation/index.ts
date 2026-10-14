@@ -41,6 +41,7 @@ export const consultationController = new Elysia({ prefix: "/api/consultation" }
       try {
         return await consultationService.processPreset(params.id);
       } catch (err: any) {
+        console.error("[ConsultationController] Error processPreset:", err);
         set.status = 500;
         return { error: err.message || "Gagal memproses preset audio." };
       }

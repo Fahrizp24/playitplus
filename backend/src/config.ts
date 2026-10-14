@@ -38,22 +38,20 @@ function requirePort(): number {
 }
 
 function loadConfig(): AppConfig {
-  const sttApiKey = process.env.STT_API_KEY || "";
-  const sttBaseUrl = process.env.STT_BASE_URL || "";
-  const sttModel = process.env.STT_MODEL || "";
-
+  const rawSttProvider = (process.env.STT_PROVIDER || "").toLowerCase().trim();
   const hfSpaceUrl = process.env.HF_SPACE_URL || "";
   const hfToken = process.env.HF_TOKEN ? process.env.HF_TOKEN.trim() : "";
+
   const sttProvider: STTProviderMode =
-    process.env.STT_PROVIDER === "hf_space"
-      ? "hf_space"
-      : hfSpaceUrl
-      ? "hf_space"
-      : "unified";
+    rawSttProvider === "hf_space" ? "hf_space" : "unified";
 
   const llmApiKey = process.env.LLM_API_KEY || "";
   const llmBaseUrl = process.env.LLM_BASE_URL || "";
   const llmModel = process.env.LLM_MODEL || "";
+
+  const sttBaseUrl = process.env.STT_BASE_URL || "";
+  const sttModel = process.env.STT_MODEL || "";
+  const sttApiKey = process.env.STT_API_KEY || process.env.LLM_API_KEY || "";
 
   return {
     port: requirePort(),

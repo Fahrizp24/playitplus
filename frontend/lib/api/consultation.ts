@@ -10,13 +10,20 @@ import type {
 } from "../types";
 
 function extractErrorMessage(errorValue: unknown, defaultMessage: string): string {
-  if (
-    typeof errorValue === "object" &&
-    errorValue !== null &&
-    "error" in errorValue &&
-    typeof (errorValue as Record<string, unknown>).error === "string"
-  ) {
-    return (errorValue as Record<string, unknown>).error as string;
+  if (typeof errorValue === "string" && errorValue.trim()) {
+    return errorValue;
+  }
+  if (typeof errorValue === "object" && errorValue !== null) {
+    const errObj = errorValue as Record<string, unknown>;
+    if (typeof errObj.error === "string" && errObj.error.trim()) {
+      return errObj.error;
+    }
+    if (typeof errObj.message === "string" && errObj.message.trim()) {
+      return errObj.message;
+    }
+    if (typeof errObj.summary === "string" && errObj.summary.trim()) {
+      return errObj.summary;
+    }
   }
   return defaultMessage;
 }

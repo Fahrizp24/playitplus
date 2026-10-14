@@ -54,10 +54,11 @@ export class UnifiedSTTProvider implements STTProvider {
   ): Promise<STTTranscriptionResult> {
     const { apiKey, baseUrl, model } = this.getValidConfig();
 
-    const filename = options?.filename || (audioData instanceof File ? audioData.name : "");
-    if (!filename) {
-      throw new Error("Nama berkas audio (filename) wajib disertakan untuk STT.");
-    }
+    const filename =
+      options?.filename ||
+      (audioData instanceof File ? audioData.name : "") ||
+      "recording.webm";
+
     const blob =
       audioData instanceof Blob
         ? audioData
@@ -95,7 +96,7 @@ export class UnifiedSTTProvider implements STTProvider {
     return {
       text: data.text || "",
       durationSeconds: data.duration,
-      provider: `unified (${model})`,
+      provider: `${this.name} (${model})`,
     };
   }
 }
@@ -105,8 +106,8 @@ import { HuggingFaceSpaceSTTProvider } from "./hf-space";
 export { HuggingFaceSpaceSTTProvider };
 
 export function getSTTProvider(): STTProvider {
-  if (config.stt.provider === "hf_space" && config.stt.hfSpaceUrl) {
-    return new HuggingFaceSpaceSTTProvider(config.stt.hfSpaceUrl, config.stt.hfToken);
+  if (config.stt.provider === "hf_space") {
+    return new HuggingFaceSpaceSTTProvider(config.stt.hfSpaceUrl || "", config.stt.hfToken);
   }
   return new UnifiedSTTProvider(config.stt.apiKey, config.stt.baseUrl, config.stt.model);
 }

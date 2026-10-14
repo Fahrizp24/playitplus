@@ -8,9 +8,10 @@ import { userController } from "./modules/user";
 export const app = new Elysia()
   .use(
     cors({
-      origin: [config.corsOrigin],
+      origin: [config.corsOrigin, "http://localhost:3000", "http://127.0.0.1:3000"],
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
+      allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+      credentials: true,
     })
   )
   .get("/", () => ({
@@ -21,7 +22,10 @@ export const app = new Elysia()
   .use(authController)
   .use(userController)
   .use(consultationController)
-  .listen(config.port);
+  .listen({
+    port: config.port,
+    idleTimeout: 255,
+  });
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname || "localhost"}:${app.server?.port || config.port}`

@@ -134,7 +134,7 @@ export const AudioMetadataSchema = t.Object({
   filename: t.String(),
   sizeBytes: t.Number(),
   mimeType: t.String(),
-  durationSeconds: t.Optional(t.Number()),
+  durationSeconds: t.Optional(t.Nullable(t.Number())),
 });
 
 export type AudioMetadata = Static<typeof AudioMetadataSchema>;
@@ -142,12 +142,12 @@ export type AudioMetadata = Static<typeof AudioMetadataSchema>;
 export const ConsultationProcessResultSchema = t.Object({
   id: t.String(),
   createdAt: t.String(),
-  audioMetadata: t.Optional(AudioMetadataSchema),
+  audioMetadata: t.Optional(t.Nullable(AudioMetadataSchema)),
   stt: t.Object({
     providerUsed: t.String(),
     transcript: t.String(),
-    rawTranscript: t.Optional(t.String()),
-    durationSeconds: t.Optional(t.Number()),
+    rawTranscript: t.Optional(t.Nullable(t.String())),
+    durationSeconds: t.Optional(t.Nullable(t.Number())),
   }),
   deidentification: DeidentificationResultSchema,
   soap: SOAPDataSchema,
