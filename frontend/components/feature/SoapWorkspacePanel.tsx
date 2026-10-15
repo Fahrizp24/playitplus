@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import type { Medication, SOAPData, TraceableQuote } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { envConfig } from "@/lib/config";
 
 interface SoapWorkspacePanelProps {
   soapData: SOAPData | null;
@@ -47,6 +48,10 @@ export function SoapWorkspacePanel({
   };
   const [isSignedOff, setIsSignedOff] = useState(false);
   const [copiedWA, setCopiedWA] = useState(false);
+  const [waModalOpen, setWaModalOpen] = useState(false);
+  const [waPhone, setWaPhone] = useState("");
+  const [waSending, setWaSending] = useState(false);
+  const [waError, setWaError] = useState("");
 
   if (!soapData) {
     if (isLoading) {
@@ -149,7 +154,7 @@ export function SoapWorkspacePanel({
 
   const { subjective, objective, assessment, plan, patientSummary, uncertainties } = soapData;
 
-  const handleCopyWhatsApp = () => {
+  const buildWhatsAppText = () => {
     const facilityPrefix = patientSummary.facilityName ? `*${patientSummary.facilityName}*\n` : "";
     const doctorPrefix = patientSummary.doctorName ? `Dokter: ${patientSummary.doctorName}\n` : "";
     const formattedDate = formatDisplayDate(patientSummary.date);
@@ -177,9 +182,29 @@ ${patientSummary.emergencySigns.map((s: string) => `• ${s}`).join("\n")}
 
 _Pesan ini merupakan ringkasan informasi konsultasi._`;
 
-    navigator.clipboard.writeText(text);
-    setCopiedWA(true);
-    setTimeout(() => setCopiedWA(false), 2500);
+    return text;
+  };
+
+  const handleSendWhatsApp = async () => {
+    setWaSending(true);
+    setWaError("");
+    try {
+      const res = await fetch(`${envConfig.apiBaseUrl}/api/whatsapp/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: waPhone, message: buildWhatsAppText() }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error ?? "Gagal mengirim WhatsApp.");
+      setCopiedWA(true);
+      setWaModalOpen(false);
+      setWaPhone("");
+      setTimeout(() => setCopiedWA(false), 2500);
+    } catch (err) {
+      setWaError(err instanceof Error ? err.message : "Gagal mengirim WhatsApp.");
+    } finally {
+      setWaSending(false);
+    }
   };
 
   const renderEvidenceChips = (evidences: TraceableQuote[]) => {
@@ -370,8 +395,13 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
                 <h4 className="text-sm font-bold text-slate-900 lg:text-[14px]">
                   Format Pesan Pasien
                 </h4>
-                <Button type="button" variant="primary" onClick={handleCopyWhatsApp}>
-                  {copiedWA ? "Tersalin!" : "Salin Pesan WhatsApp"}
+                <Button
+                  type="button"
+                  variant="primary"
+                  disabled={!isSignedOff}
+                  onClick={() => { setWaError(""); setWaModalOpen(true); }}
+                >
+                  {copiedWA ? "Terkirim!" : "Kirim ke WhatsApp"}
                 </Button>
               </div>
 
@@ -414,6 +444,21 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
           </div>
         )}
       </div>
+
+      {waModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="wa-modal-title" className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl lg:max-w-[440px] lg:rounded-[12px] lg:p-[20px]">
+            <h4 id="wa-modal-title" className="text-sm font-bold text-slate-900 lg:text-[15px]">Kirim Resume ke WhatsApp</h4>
+            <p className="mt-2 text-xs text-slate-600 lg:mt-[8px] lg:text-[13px]">Pengiriman resume akan dikirim ke nomor WhatsApp Anda. Mohon isi nomor tujuan:</p>
+            <input type="tel" inputMode="tel" autoFocus value={waPhone} onChange={(e) => setWaPhone(e.target.value)} placeholder="08xxxxxxxxxx" className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 lg:mt-[12px] lg:rounded-[8px] lg:px-[12px] lg:py-[8px] lg:text-[14px]" />
+            {waError && <p role="alert" className="mt-2 text-xs text-red-600 lg:mt-[8px] lg:text-[12px]">{waError}</p>}
+            <div className="mt-4 flex justify-end gap-2 lg:mt-[16px] lg:gap-[8px]">
+              <Button type="button" variant="outline" disabled={waSending} onClick={() => setWaModalOpen(false)}>Batal</Button>
+              <Button type="button" variant="primary" disabled={waSending || !waPhone.trim()} onClick={handleSendWhatsApp}>{waSending ? "Mengirim..." : "Kirim"}</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

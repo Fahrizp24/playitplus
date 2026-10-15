@@ -4,6 +4,10 @@ import { config } from "./config";
 import { authController } from "./modules/auth";
 import { consultationController } from "./modules/consultation";
 import { userController } from "./modules/user";
+import { whatsappController } from "./modules/whatsapp";
+import { startWhatsApp } from "./modules/whatsapp/service";
+
+void startWhatsApp();
 
 export const app = new Elysia()
   .use(
@@ -22,6 +26,7 @@ export const app = new Elysia()
   .use(authController)
   .use(userController)
   .use(consultationController)
+  .use(whatsappController)
   .listen({
     port: config.port,
     idleTimeout: 255,

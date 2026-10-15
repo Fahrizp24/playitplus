@@ -11,9 +11,12 @@
   "dependencies": {
     "@elysiajs/cors": "^1.4.2",
     "@gradio/client": "^2.7.1",
-    "elysia": "^1.4.30"
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "elysia": "^1.4.30",
+    "qrcode-terminal": "^0.12.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.2"
+    "@types/bun": "^1.4.2",
+    "@types/qrcode-terminal": "^0.12.2"
   }
 }
