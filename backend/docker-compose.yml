@@ -1,0 +1,12 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    ports:
+      - "3001:3001"
+    volumes:
+      - whatsapp_auth:/app/whatsapp_auth
+    restart: unless-stopped
+
+volumes:
+  whatsapp_auth:
