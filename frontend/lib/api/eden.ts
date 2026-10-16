@@ -1,11 +1,11 @@
 import { treaty } from "@elysiajs/eden";
-import type { App } from "@backend/index";
 import { envConfig } from "@/lib/config";
 
 /**
  * Satu Client Eden tunggal untuk seluruh komunikasi API aplikasi.
- * Terhubung langsung dengan type definisi backend Elysia (App).
+ * Backend dideploy terpisah, sehingga implementasinya tidak ikut dibundel frontend.
  */
-export const eden = treaty<App>(envConfig.apiBaseUrl);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend contract is deployed independently.
+export const eden: any = treaty(envConfig.apiBaseUrl);
 
 export type EdenClient = typeof eden;
