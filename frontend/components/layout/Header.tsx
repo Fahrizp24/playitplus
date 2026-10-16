@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 interface HeaderProps {
   doctorName?: string;
@@ -37,13 +38,18 @@ export function Header({
       <div className="max-w-7xl w-full mx-auto px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between lg:px-[32px] lg:py-[14px] lg:gap-[16px]">
         {/* Brand Header */}
         <div className="flex items-center gap-3 lg:gap-[14px]">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 text-white font-black shadow-sm lg:w-[42px] lg:h-[42px] lg:rounded-[12px] lg:text-[17px]">
-            +
-          </div>
+          <Image
+            src="/logo%20only.png"
+            alt="Logo PlayItPlus"
+            width={895}
+            height={895}
+            priority
+            className="h-10 w-10 lg:h-[42px] lg:w-[42px]"
+          />
           <div>
             <div className="flex items-center gap-2 lg:gap-[8px]">
               <h1 className="text-base font-bold tracking-tight text-slate-900 lg:text-[18px] lg:leading-[22px]">
-                PlayItPlus <span className="text-blue-600 font-semibold">SIMRS</span>
+                Veriscribe <span className="text-blue-600 font-semibold">SIMRS</span>
               </h1>
             </div>
             {clinicName && (

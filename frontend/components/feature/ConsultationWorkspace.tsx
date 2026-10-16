@@ -525,6 +525,7 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
                     <div className="lg:col-span-7 flex flex-col gap-4 lg:gap-[16px]">
                       <SoapWorkspacePanel
                         soapData={soapData}
+                        patient={selectedPatient}
                         isLoading={isGeneratingSoap}
                         onSelectQuote={handleSelectQuote}
                         activeQuote={highlightQuote}

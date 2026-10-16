@@ -8,6 +8,11 @@ import { envConfig } from "@/lib/config";
 
 interface SoapWorkspacePanelProps {
   soapData: SOAPData | null;
+  patient: {
+    patientName: string;
+    patientAge: number;
+    gender: string;
+  } | null;
   isLoading?: boolean;
   onSelectQuote: (quote: string) => void;
   activeQuote: string | null;
@@ -16,7 +21,7 @@ interface SoapWorkspacePanelProps {
 }
 
 function formatDisplayDate(val: unknown): string {
-  if (!val) return "-";
+  if (!val) return "";
   if (val instanceof Date) {
     try {
       return new Intl.DateTimeFormat("id-ID", {
@@ -31,8 +36,23 @@ function formatDisplayDate(val: unknown): string {
   return String(val);
 }
 
+function cleanUnavailableText(value: string): string {
+  return value
+    .split(/(?<=[.!?])\s+/)
+    .filter((sentence) => !/tidak disebutkan|tidak tersedia|tidak ada informasi/i.test(sentence))
+    .join(" ")
+    .trim();
+}
+
+function cleanItems(items: string[], medication = false): string[] {
+  return items
+    .map((item) => cleanUnavailableText(item))
+    .filter((item) => item && !(medication && /tidak ada obat yang diresepkan/i.test(item)));
+}
+
 export function SoapWorkspacePanel({
   soapData,
+  patient,
   isLoading = false,
   onSelectQuote,
   activeQuote,
@@ -155,34 +175,29 @@ export function SoapWorkspacePanel({
   const { subjective, objective, assessment, plan, patientSummary, uncertainties } = soapData;
 
   const buildWhatsAppText = () => {
-    const facilityPrefix = patientSummary.facilityName ? `*${patientSummary.facilityName}*\n` : "";
-    const doctorPrefix = patientSummary.doctorName ? `Dokter: ${patientSummary.doctorName}\n` : "";
-    const formattedDate = formatDisplayDate(patientSummary.date);
+    const list = (items: string[]) => cleanItems(items).map((item) => `• ${item}`).join("\n");
+    const section = (title: string, body: string) => (body.trim() ? `*${title}*\n${body}` : "");
+    const conclusion = cleanUnavailableText(patientSummary.simpleConclusion);
+    const controlSchedule = cleanUnavailableText(patientSummary.controlSchedule);
+    const header = [
+      patientSummary.facilityName && cleanUnavailableText(patientSummary.facilityName),
+      "*Ringkasan Hasil Konsultasi*",
+      patient ? `Nama: ${patient.patientName}` : "",
+      patient ? `Usia: ${patient.patientAge} tahun | ${patient.gender}` : "",
+      formatDisplayDate(patientSummary.date) && `Tanggal: ${formatDisplayDate(patientSummary.date)}`,
+      cleanUnavailableText(patientSummary.doctorName ?? "") && `Dokter: ${cleanUnavailableText(patientSummary.doctorName ?? "")}`,
+    ].filter(Boolean).join("\n");
 
-    const text = `${facilityPrefix}Ringkasan Konsultasi Medis
-Tanggal: ${formattedDate}
-${doctorPrefix}
-*1. Kesimpulan:*
-${patientSummary.simpleConclusion}
-
-*2. Instruksi Obat:*
-${patientSummary.medicationInstructions.map((m: string) => `• ${m}`).join("\n")}
-
-*3. Anjuran:*
-${patientSummary.lifestyleAdvice.map((a: string) => `• ${a}`).join("\n")}
-
-*4. Hal yang Perlu Dihindari:*
-${patientSummary.thingsToAvoid.map((t: string) => `• ${t}`).join("\n")}
-
-*5. Rencana Kontrol:*
-${patientSummary.controlSchedule}
-
-*6. Tanda Bahaya:*
-${patientSummary.emergencySigns.map((s: string) => `• ${s}`).join("\n")}
-
-_Pesan ini merupakan ringkasan informasi konsultasi._`;
-
-    return text;
+    return [
+      header,
+      section("Kesimpulan", conclusion),
+      section("Obat yang perlu diminum", cleanItems(patientSummary.medicationInstructions, true).map((item) => `• ${item}`).join("\n")),
+      section("Anjuran", list(patientSummary.lifestyleAdvice)),
+      section("Hal yang perlu dihindari", list(patientSummary.thingsToAvoid)),
+      section("Jadwal kontrol", controlSchedule),
+      section("Segera ke IGD/dokter jika", list(patientSummary.emergencySigns)),
+      "_Jika ada yang kurang jelas atau kondisi memburuk, hubungi fasilitas kesehatan._",
+    ].filter(Boolean).join("\n\n");
   };
 
   const handleSendWhatsApp = async () => {
@@ -405,41 +420,7 @@ _Pesan ini merupakan ringkasan informasi konsultasi._`;
                 </Button>
               </div>
 
-              <div className="space-y-2 lg:space-y-[8px]">
-                {patientSummary.facilityName && (
-                  <p><strong>Fasilitas:</strong> {patientSummary.facilityName}</p>
-                )}
-                <p><strong>Tanggal:</strong> {formatDisplayDate(patientSummary.date)}</p>
-                {patientSummary.doctorName && (
-                  <p><strong>Dokter:</strong> {patientSummary.doctorName}</p>
-                )}
-                <p><strong>Kesimpulan:</strong> {patientSummary.simpleConclusion}</p>
-                <div>
-                  <strong>Petunjuk Obat:</strong>
-                  <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
-                    {patientSummary.medicationInstructions.map((m: string, idx: number) => (
-                      <li key={idx}>{m}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <strong>Anjuran:</strong>
-                  <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
-                    {patientSummary.lifestyleAdvice.map((a: string, idx: number) => (
-                      <li key={idx}>{a}</li>
-                    ))}
-                  </ul>
-                </div>
-                <p><strong>Jadwal Kontrol:</strong> {patientSummary.controlSchedule}</p>
-                <div>
-                  <strong>Tanda Bahaya:</strong>
-                  <ul className="list-disc list-inside mt-0.5 lg:mt-[2px]">
-                    {patientSummary.emergencySigns.map((s: string, idx: number) => (
-                      <li key={idx}>{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+              <pre className="whitespace-pre-wrap font-sans leading-relaxed text-slate-700">{buildWhatsAppText()}</pre>
             </div>
           </div>
         )}
