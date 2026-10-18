@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+<style>text{font-family:Arial,sans-serif;fill:#183449} .title{font-size:36px;font-weight:700} .head{font-size:24px;font-weight:700} .label{font-size:22px;font-weight:700} .body{font-size:19px} .small{font-size:17px} .line{fill:none;stroke:#258779;stroke-width:4;stroke-linecap:round;stroke-linejoin:round} .ink{fill:none;stroke:#183449;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}</style>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#258779"/></marker>
+<g id="doctor"><circle cx="0" cy="-42" r="21" fill="#dbac8b"/><path d="M-22-47Q-20-78 6-66Q25-65 23-43L9-52-7-50Z" fill="#183449"/><path d="M-39 38V-8Q-32-27-12-24L0-9 12-24Q34-24 39-8V38Z" fill="white" stroke="#183449" stroke-width="3"/><path d="M-12-23 0 10 12-23M0 10V38M-18-14V8Q-18 22-7 22" class="ink"/><circle cx="-7" cy="22" r="4" fill="#258779"/></g>
+<g id="patient"><circle cx="0" cy="-42" r="21" fill="#b87f61"/><path d="M-22-46Q-21-74 6-66Q25-61 23-44L10-52-10-51Z" fill="#183449"/><path d="M-39 38V-7Q-34-26-14-24L0-17 14-24Q35-24 39-7V38Z" fill="#75bdb2" stroke="#183449" stroke-width="3"/></g>
+<g id="doc"><rect x="-34" y="-45" width="68" height="90" rx="7" fill="white" stroke="#183449" stroke-width="3"/><path d="M-20-24H17M-20-8H20M-20 8H20M-20 24H7" class="ink"/></g>
+<g id="check"><circle r="19" fill="#258779"/><path d="m-9 0 6 6 13-14" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/></g>
+</defs>
+<rect width="1600" height="900" fill="#fff"/>
+<text x="800" y="62" text-anchor="middle" class="title">Satu konsultasi, dua keluaran tervalidasi</text>
+<text x="800" y="98" text-anchor="middle" class="body">Asisten dokumentasi konsultasi dan ringkasan tindak lanjut pasien berbasis AI</text>
+<rect x="40" y="130" width="530" height="647" rx="22" fill="#fcf4f3"/>
+<rect x="595" y="130" width="965" height="647" rx="22" fill="#f0f8f7"/>
+<text x="72" y="174" class="head">KONDISI SAAT INI</text>
+<text x="625" y="174" class="head">KONSEP YANG DITAWARKAN</text>
+<!-- Manual documentation: consultation, desk and computer -->
+<use href="#doctor" transform="translate(180 286)"/><use href="#patient" transform="translate(390 286)"/>
+<path d="M96 326H465M125 326V368M444 326V368" class="ink"/>
+<rect x="240" y="260" width="82" height="55" rx="5" fill="#e1e8ed" stroke="#183449" stroke-width="3"/>
+<path d="M281 315V326M252 326H309M250 274H305M250 285H292M250 296H299" class="ink"/>
+<path d="M204 310 234 305 241 321 211 325" fill="white" stroke="#183449" stroke-width="2"/>
+<circle cx="470" cy="233" r="26" fill="white" stroke="#b86b62" stroke-width="3"/><path d="M470 216V234L482 240" fill="none" stroke="#b86b62" stroke-width="3"/>
+<text x="305" y="408" text-anchor="middle" class="label">Dokter mencatat manual</text>
+<text x="305" y="440" text-anchor="middle" class="body">Pencatatan dan penyalinan berulang</text>
+<path d="M80 470H530" stroke="#e8d7d5" stroke-width="2"/>
+<use href="#patient" transform="translate(220 574)"/>
+<path d="M275 505Q275 478 308 478H363Q395 478 395 505V528Q395 551 363 551H309L286 570 290 547Q275 541 275 525Z" fill="white" stroke="#b86b62" stroke-width="3"/>
+<text x="334" y="530" text-anchor="middle" font-size="42" font-weight="700">?</text>
+<text x="305" y="655" text-anchor="middle" class="label">Pasien mengandalkan ingatan</text>
+<text x="305" y="687" text-anchor="middle" class="body">Instruksi berpotensi terlupa</text>
+<text x="305" y="746" text-anchor="middle" class="small">Kebutuhan perlu divalidasi bersama pengguna</text>
+<!-- Three explicit workflow stages -->
+<rect x="625" y="205" width="275" height="222" rx="16" fill="white" stroke="#c6dfda" stroke-width="2"/>
+<rect x="940" y="205" width="275" height="222" rx="16" fill="white" stroke="#c6dfda" stroke-width="2"/>
+<rect x="1255" y="205" width="275" height="222" rx="16" fill="white" stroke="#258779" stroke-width="3"/>
+<use href="#doctor" transform="translate(712 287) scale(.7)"/><use href="#patient" transform="translate(810 287) scale(.7)"/>
+<rect x="754" y="273" width="15" height="28" rx="7" fill="#258779"/><path d="M750 288V295Q750 310 762 310Q775 310 775 295V288M762 310V318" class="line"/>
+<text x="762" y="358" text-anchor="middle" class="label">1. Rekam konsultasi</text>
+<text x="762" y="390" text-anchor="middle" class="body">Dengan persetujuan pasien</text>
+<path d="M904 306H933" class="line" marker-end="url(#arrow)"/>
+<use href="#doc" transform="translate(1080 281) scale(.85)"/>
+<rect x="995" y="259" width="42" height="42" rx="10" fill="#258779"/><text x="1016" y="287" text-anchor="middle" style="fill:white;font-size:23px;font-weight:bold">AI</text>
+<text x="1077" y="358" text-anchor="middle" class="label">2. AI menyusun draf</text>
+<text x="1077" y="390" text-anchor="middle" class="body">Identitas dilindungi</text>
+<path d="M1219 306H1248" class="line" marker-end="url(#arrow)"/>
+<use href="#doctor" transform="translate(1360 282) scale(.8)"/><use href="#doc" transform="translate(1435 281) scale(.65)"/><use href="#check" transform="translate(1457 307) scale(.8)"/>
+<text x="1392" y="358" text-anchor="middle" class="label">3. Dokter memeriksa</text>
+<text x="1392" y="390" text-anchor="middle" class="body">Mengoreksi dan mengesahkan</text>
+<!-- Approved clinical note is the source of both outputs -->
+<path d="M1392 429V466H858V493" class="line" marker-end="url(#arrow)"/>
+<text x="1077" y="454" text-anchor="middle" class="small">Hanya catatan yang telah disahkan</text>
+<rect x="625" y="502" width="425" height="223" rx="16" fill="white" stroke="#258779" stroke-width="2"/>
+<use href="#doc" transform="translate(698 565) scale(.8)"/><use href="#check" transform="translate(722 590) scale(.8)"/>
+<text x="755" y="548" class="small">KELUARAN 1</text>
+<text x="755" y="580" class="label">Catatan klinis</text>
+<text x="755" y="607" class="label">terstruktur</text>
+<text x="653" y="655" class="body">Disimpan ke sistem fasilitas kesehatan</text>
+<text x="653" y="687" class="small">Melalui jalur integrasi yang disepakati</text>
+<path d="M1053 600H1120" class="line" marker-end="url(#arrow)"/>
+<text x="1086" y="630" text-anchor="middle" style="font-size:14px">Sumber</text>
+<rect x="1130" y="502" width="400" height="223" rx="16" fill="white" stroke="#258779" stroke-width="2"/>
+<rect x="1153" y="524" width="61" height="100" rx="9" fill="#e5f3f0" stroke="#183449" stroke-width="3"/><path d="M1173 534H1194M1164 552H1202M1164 567H1202M1164 582H1195" class="ink"/><use href="#check" transform="translate(1205 614) scale(.75)"/>
+<text x="1231" y="548" class="small">KELUARAN 2</text>
+<text x="1231" y="580" class="label">Ringkasan tindak</text><text x="1231" y="607" class="label">lanjut pasien</text>
+<text x="1154" y="655" class="body">Diperiksa dokter sebelum dikirim</text>
+<text x="1154" y="685" class="small">Izin dan penerima diverifikasi</text>
+<text x="1330" y="750" text-anchor="middle" class="small">WhatsApp: simulasi purwarupa</text>
+<text x="800" y="825" text-anchor="middle" class="label">AI membantu dokumentasi. Keputusan klinis tetap pada dokter.</text>
+<text x="800" y="861" text-anchor="middle" class="small">Konsep purwarupa; manfaat masih perlu diuji.</text>
+</svg>
