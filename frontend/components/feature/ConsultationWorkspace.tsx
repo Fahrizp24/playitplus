@@ -318,6 +318,34 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
             </div>
           )}
 
+          {!selectedPatient && (
+            <section aria-labelledby="consultation-flow-title" className="rounded-2xl border border-blue-100 bg-blue-50/50 px-4 py-4 sm:px-5 lg:px-[24px] lg:py-[20px] lg:rounded-[14px]">
+              <h2 id="consultation-flow-title" className="text-base font-bold text-slate-900 lg:text-[17px]">
+                Tips alur konsultasi
+              </h2>
+              <ol className="mt-3 grid grid-flow-col grid-rows-9 gap-x-4 gap-y-2 lg:mt-[12px] lg:grid-rows-3 lg:gap-x-[20px] lg:gap-y-[10px]">
+                {[
+                  "Pilih pasien dari antrean.",
+                  "Rekam suara, unggah audio, atau pilih percakapan simulasi.",
+                  "Tunggu transkrip dan draf ringkasan (sekitar 1–3 menit, tergantung provider/model).",
+                  "Periksa ringkasan pasien dan koreksi bila perlu.",
+                  "Sahkan catatan setelah diverifikasi.",
+                  "Pilih Kirim ke WhatsApp.",
+                  "Masukkan nomor WhatsApp penerima.",
+                  "Pastikan ringkasan masuk ke WhatsApp tujuan.",
+                  "Selesai.",
+                ].map((step, index) => (
+                  <li key={step} className="flex items-start gap-2.5 text-sm leading-relaxed text-slate-700 lg:gap-[12px] lg:text-[14px]">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-blue-200 bg-white text-xs font-bold text-blue-700 lg:h-[24px] lg:w-[24px] lg:text-[12px]">
+                      {index + 1}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+
           {/* KONDISI 1: Belum Ada Pasien yang Dipilih */}
           {!selectedPatient && (
             <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-8 sm:p-12 text-center flex flex-col items-center justify-center gap-4 shadow-xs lg:p-[48px] lg:rounded-[16px] lg:gap-[16px]">
