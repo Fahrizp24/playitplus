@@ -318,8 +318,7 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
             </div>
           )}
 
-          {!selectedPatient && (
-            <section aria-labelledby="consultation-flow-title" className="rounded-2xl border border-blue-100 bg-blue-50/50 px-4 py-4 sm:px-5 lg:px-[24px] lg:py-[20px] lg:rounded-[14px]">
+          <section aria-labelledby="consultation-flow-title" className="rounded-2xl border border-blue-100 bg-blue-50/50 px-4 py-4 sm:px-5 lg:px-[24px] lg:py-[20px] lg:rounded-[14px]">
               <h2 id="consultation-flow-title" className="text-base font-bold text-slate-900 lg:text-[17px]">
                 Tips alur konsultasi
               </h2>
@@ -344,7 +343,6 @@ export function ConsultationWorkspace({}: ConsultationWorkspaceProps = {}) {
                 ))}
               </ol>
             </section>
-          )}
 
           {/* KONDISI 1: Belum Ada Pasien yang Dipilih */}
           {!selectedPatient && (
