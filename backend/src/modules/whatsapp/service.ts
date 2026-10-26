@@ -8,9 +8,12 @@ import qrcode from "qrcode-terminal";
 import pino from "pino";
 
 const authDir = "./whatsapp_auth";
+const maxReconnectAttempts = 3;
 let socket: WASocket | null = null;
 let connected = false;
 let qrAvailable = false;
+let reconnectAttempts = 0;
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
 export async function startWhatsApp(): Promise<void> {
   socket?.ev.removeAllListeners("connection.update");
@@ -35,19 +38,30 @@ export async function startWhatsApp(): Promise<void> {
     if (connection === "open") {
       connected = true;
       qrAvailable = false;
+      reconnectAttempts = 0;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      reconnectTimer = null;
       console.log("WhatsApp Baileys terhubung.");
     }
 
     if (connection === "close") {
       connected = false;
+      qrAvailable = false;
       const code = (lastDisconnect?.error as { output?: { statusCode?: number } })?.output?.statusCode;
       console.log(`Koneksi WhatsApp terputus (kode ${code}).`);
       if (code === DisconnectReason.loggedOut) {
         console.log("WhatsApp logout. Hapus folder whatsapp_auth untuk login ulang.");
       } else if (code === DisconnectReason.connectionReplaced) {
-        console.log("Sesi dipakai instance lain. Tutup proses bun lain, lalu restart. Tidak reconnect.");
-      } else {
-        setTimeout(() => void startWhatsApp(), 3000);
+        console.log("Sesi dipakai instance lain. Tutup instance lain, lalu restart. Tidak reconnect.");
+      } else if (reconnectAttempts < maxReconnectAttempts && !reconnectTimer) {
+        reconnectAttempts += 1;
+        console.log(`Mencoba reconnect ${reconnectAttempts}/${maxReconnectAttempts} dalam 3 detik.`);
+        reconnectTimer = setTimeout(() => {
+          reconnectTimer = null;
+          void startWhatsApp();
+        }, 3000);
+      } else if (!reconnectTimer) {
+        console.log("Batas reconnect tercapai. Restart layanan secara manual untuk mencoba lagi.");
       }
     }
   });

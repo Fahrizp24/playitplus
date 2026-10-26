@@ -7,7 +7,11 @@ import { userController } from "./modules/user";
 import { whatsappController } from "./modules/whatsapp";
 import { startWhatsApp } from "./modules/whatsapp/service";
 
-void startWhatsApp();
+if (process.env.WHATSAPP_ENABLED !== "false") {
+  void startWhatsApp();
+} else {
+  console.log("WhatsApp Baileys dinonaktifkan melalui WHATSAPP_ENABLED=false.");
+}
 
 export const app = new Elysia()
   .use(
