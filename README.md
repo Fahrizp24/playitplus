@@ -9,11 +9,25 @@ VeriScribe membantu dokter rawat jalan mengubah percakapan konsultasi menjadi du
 
 Nama **VeriScribe** adalah judul proposal proyek ini; **PlayItPlus** adalah nama purwarupa yang berjalan (demo: https://playitplus.vercel.app/). Konsep lengkap ada di `docs/KONSEP_PROYEK.md`.
 
+> **Singkatnya:** dokter cukup berbicara dengan pasien seperti biasa. VeriScribe yang mendengarkan percakapan itu, menuliskan draf catatannya, dan menyiapkan ringkasan untuk pasien. Dokter tinggal membaca, memperbaiki bila perlu, dan menyetujui.
+
 > Prinsip yang tidak berubah: **AI membantu dokumentasi. Keputusan klinis tetap pada dokter.** Sistem tidak menetapkan diagnosis, tidak meresepkan obat, dan tidak menggantikan keputusan dokter. Draf AI bersifat usulan — final hanya setelah dokter memeriksa, mengoreksi, dan mengesahkannya.
 
 ![Satu konsultasi, dua keluaran tervalidasi](docs/konsep-dua-keluaran.png)
 
 *Ilustrasi konsep: kondisi saat ini (kiri) dibanding alur yang ditawarkan VeriScribe (kanan).*
+
+## Tujuan kami, dengan bahasa sederhana
+
+Bayangkan satu kali konsultasi di klinik atau puskesmas. Dalam waktu yang singkat itu, dokter harus melakukan dua pekerjaan sekaligus: mendengarkan dan memeriksa pasien, **dan** menulis catatan hasil pemeriksaan. Akibatnya waktu dokter banyak habis untuk menulis, bukan untuk pasien. Sebaliknya, pasien pulang hanya bermodal ingatan: obat apa yang harus diminum, bagaimana aturannya, dan kapan harus kontrol lagi — semua mudah terlupa begitu sampai di rumah.
+
+Tujuan kami membuat VeriScribe ada tiga, dan semuanya berangkat dari satu percakapan yang sama:
+
+1. **Dokter bisa fokus ke pasien, bukan ke tulisan.** Urusan menulis catatan dibantu AI, jadi waktu konsultasi dipakai untuk berbicara dan memeriksa. Dokter tidak lagi menulis ulang hal yang sama berkali-kali.
+2. **Catatannya rapi dan bisa dipercaya.** Semua catatan memakai format yang sama, dan setiap isinya bisa dicek kembali ke ucapan aslinya di percakapan. AI tidak mengarang: kalau sesuatu tidak dibicarakan, bagian itu ditandai kosong, bukan diisi tebakan. Keputusan terakhir tetap di tangan dokter — catatan baru resmi setelah dokter menyetujuinya.
+3. **Pasien pulang membawa pegangan, bukan hanya ingatan.** Pasien menerima ringkasan dengan bahasa sehari-hari: obatnya apa, cara minumnya bagaimana, anjurannya apa, dan kapan kontrol lagi. Isinya sama persis dengan yang diputuskan dokter, karena ringkasan itu dibuat dari catatan yang sudah disetujui dokter — jadi kecil kemungkinan pasien salah ingat atau salah paham.
+
+Kalau tiga hal ini tercapai, yang terbantu bukan hanya dokter dan pasien: klinik juga mendapat catatan yang seragam dan rapi dari semua dokternya, tanpa menambah pekerjaan siapa pun. Itulah tujuan akhirnya — **satu konsultasi selesai, dua kebutuhan terpenuhi: dokter punya catatan yang sah, pasien punya panduan yang jelas.**
 
 ## Masalah yang diselesaikan
 
