@@ -1,6 +1,6 @@
 # VeriScribe (PlayItPlus)
 
-**Asisten AI dokumentasi klinis berbasis verifikasi dokter, dengan ringkasan pasien yang konsisten.**
+**Asisten AI dokumentasi klinis berbasis audio dengan verifikasi dokter, dengan ringkasan pasien yang konsisten.**
 
 VeriScribe membantu dokter rawat jalan mengubah percakapan konsultasi menjadi dua keluaran yang tervalidasi dari satu proses:
 
