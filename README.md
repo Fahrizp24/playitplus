@@ -11,6 +11,10 @@ Nama **VeriScribe** adalah judul proposal proyek ini; **PlayItPlus** adalah nama
 
 > **Singkatnya:** dokter cukup berbicara dengan pasien seperti biasa. VeriScribe yang mendengarkan percakapan itu, menuliskan draf catatannya, dan menyiapkan ringkasan untuk pasien. Dokter tinggal membaca, memperbaiki bila perlu, dan menyetujui.
 
+> **Tentang proyek ini:** VeriScribe dibuat untuk **lomba PLAY IT Hackathon DeepTech 2026 (PlayItPlus)**, kategori Digitalisasi AI Bidang Kesehatan.
+>
+> **Status demo — mohon dibaca:** sistem ini **bekerja 100%** dari ujung ke ujung (rekam → transkrip → deidentifikasi → draf SOAP → ringkasan pasien) selama API key LLM/STT terpasang. Saat ini **API key LLM pada demo yang terpasang sudah dicabut karena alasan biaya**, jadi demo publik di https://playitplus.vercel.app/ tidak memanggil AI sungguhan sampai key dipasang lagi. Ini murni soal biaya pemakaian, bukan karena sistemnya belum jadi: untuk menjalankannya penuh, isi key Anda sendiri di `backend/.env` (lihat bagian Konfigurasi backend), atau jalankan mode `mock` untuk melihat alurnya tanpa key.
+
 > Prinsip yang tidak berubah: **AI membantu dokumentasi. Keputusan klinis tetap pada dokter.** Sistem tidak menetapkan diagnosis, tidak meresepkan obat, dan tidak menggantikan keputusan dokter. Draf AI bersifat usulan — final hanya setelah dokter memeriksa, mengoreksi, dan mengesahkannya.
 
 ![Satu konsultasi, dua keluaran tervalidasi](docs/konsep-dua-keluaran.png)
@@ -66,6 +70,8 @@ Transkripsi, draf SOAP, dan ringkasan pasien sudah ada pada berbagai produk. Keu
 
 ## Status dan yang diukur
 
+- **Konteks:** proyek lomba PLAY IT Hackathon DeepTech 2026 (PlayItPlus), kategori Digitalisasi AI Bidang Kesehatan.
+- **Kondisi demo saat ini:** seluruh alur berfungsi 100% bila API key LLM/STT terpasang; API key LLM pada demo publik sudah dicabut karena biaya, sehingga demo berjalan tanpa panggilan AI sungguhan sampai key dipasang kembali.
 - **Tingkat kesiapan teknologi:** TKT 2 menuju TKT 3. Konsep telah dirumuskan dan didukung literatur [1][2][3]; tahap berikutnya adalah pembuktian fungsi inti pada konsultasi simulasi.
 - **Batasan purwarupa:** satu alur konsultasi rawat jalan dan satu format catatan. Pengiriman WhatsApp masih simulasi.
 - **Indikator pengujian:** waktu dokumentasi total (termasuk waktu koreksi draf), kelengkapan informasi, kesalahan pada negasi dan rincian obat, jumlah fakta tanpa sumber, konsistensi ringkasan terhadap catatan yang disahkan, dan kemampuan pasien mengulang instruksi.
