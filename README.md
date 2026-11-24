@@ -21,7 +21,7 @@ Nama **VeriScribe** adalah judul proposal proyek ini; **PlayItPlus** adalah nama
 
 *Ilustrasi konsep: kondisi saat ini (kiri) dibanding alur yang ditawarkan VeriScribe (kanan).*
 
-## Tujuan kami, dengan bahasa sederhana
+## Tujuan Kami
 
 Bayangkan satu kali konsultasi di klinik atau puskesmas. Dalam waktu yang singkat itu, dokter harus melakukan dua pekerjaan sekaligus: mendengarkan dan memeriksa pasien, **dan** menulis catatan hasil pemeriksaan. Akibatnya waktu dokter banyak habis untuk menulis, bukan untuk pasien. Sebaliknya, pasien pulang hanya bermodal ingatan: obat apa yang harus diminum, bagaimana aturannya, dan kapan harus kontrol lagi — semua mudah terlupa begitu sampai di rumah.
 
