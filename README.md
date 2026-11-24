@@ -7,33 +7,33 @@ VeriScribe membantu dokter rawat jalan mengubah percakapan konsultasi menjadi du
 1. **Draf catatan klinis terstruktur (SOAP)** untuk tenaga kesehatan, dan
 2. **Ringkasan tindak lanjut berbahasa sehari-hari** untuk pasien.
 
-Nama **VeriScribe** adalah judul proposal proyek ini; **PlayItPlus** adalah nama purwarupa yang berjalan (demo: https://playitplus.vercel.app/). Konsep lengkap ada di `docs/KONSEP_PROYEK.md`.
+Nama **VeriScribe** adalah judul proposal proyek ini; **PlayItPlus** adalah nama purwarupa yang berjalan (demo: https://playitplus.vercel.app/). Konsep lengkap terdapat di `docs/KONSEP_PROYEK.md`.
 
-> **Singkatnya:** dokter cukup berbicara dengan pasien seperti biasa. VeriScribe yang mendengarkan percakapan itu, menuliskan draf catatannya, dan menyiapkan ringkasan untuk pasien. Dokter tinggal membaca, memperbaiki bila perlu, dan menyetujui.
+> **Ringkasnya:** dokter berfokus pada percakapan dengan pasien sebagaimana konsultasi pada umumnya. VeriScribe mendengarkan percakapan tersebut, menyusun draf catatannya, dan menyiapkan ringkasan untuk pasien. Dokter kemudian memeriksa draf tersebut, memperbaikinya apabila diperlukan, dan mengesahkannya.
 
-> **Tentang proyek ini:** VeriScribe dibuat untuk **lomba PLAY IT Hackathon DeepTech 2026 (PlayItPlus)**, kategori Digitalisasi AI Bidang Kesehatan.
+> **Tentang proyek ini:** VeriScribe dikembangkan untuk **lomba PLAY IT Hackathon DeepTech 2026 (PlayItPlus)**, kategori Digitalisasi AI Bidang Kesehatan.
 >
-> **Status demo — mohon dibaca:** sistem ini **bekerja 100%** dari ujung ke ujung (rekam → transkrip → deidentifikasi → draf SOAP → ringkasan pasien) selama API key LLM/STT terpasang. Saat ini **API key LLM pada demo yang terpasang sudah dicabut karena alasan biaya**, jadi demo publik di https://playitplus.vercel.app/ tidak memanggil AI sungguhan sampai key dipasang lagi. Ini murni soal biaya pemakaian, bukan karena sistemnya belum jadi: untuk menjalankannya penuh, isi key Anda sendiri di `backend/.env` (lihat bagian Konfigurasi backend), atau jalankan mode `mock` untuk melihat alurnya tanpa key.
+> **Status demo — mohon diperhatikan:** sistem ini **bekerja 100%** dari ujung ke ujung (rekam → transkrip → deidentifikasi → draf SOAP → ringkasan pasien) selama API key LLM/STT terpasang. Saat ini **API key LLM pada demo yang terpasang telah dicabut karena alasan biaya**, sehingga demo publik di https://playitplus.vercel.app/ tidak memanggil AI yang sebenarnya sampai key dipasang kembali. Hal ini murni berkaitan dengan biaya pemakaian, bukan karena sistem belum selesai: untuk menjalankannya secara penuh, silakan mengisi API key Anda pada `backend/.env` (lihat bagian Konfigurasi Backend), atau jalankan mode `mock` untuk melihat alurnya tanpa key.
 
-> Prinsip yang tidak berubah: **AI membantu dokumentasi. Keputusan klinis tetap pada dokter.** Sistem tidak menetapkan diagnosis, tidak meresepkan obat, dan tidak menggantikan keputusan dokter. Draf AI bersifat usulan — final hanya setelah dokter memeriksa, mengoreksi, dan mengesahkannya.
+> Prinsip yang tidak berubah: **AI membantu dokumentasi. Keputusan klinis tetap berada pada dokter.** Sistem tidak menetapkan diagnosis, tidak meresepkan obat, dan tidak menggantikan keputusan dokter. Draf AI bersifat usulan — final hanya setelah dokter memeriksa, mengoreksi, dan mengesahkannya.
 
 ![Satu konsultasi, dua keluaran tervalidasi](docs/konsep-dua-keluaran.png)
 
-*Ilustrasi konsep: kondisi saat ini (kiri) dibanding alur yang ditawarkan VeriScribe (kanan).*
+*Ilustrasi konsep: kondisi saat ini (kiri) dibandingkan dengan alur yang ditawarkan VeriScribe (kanan).*
 
 ## Tujuan Kami
 
-Bayangkan satu kali konsultasi di klinik atau puskesmas. Dalam waktu yang singkat itu, dokter harus melakukan dua pekerjaan sekaligus: mendengarkan dan memeriksa pasien, **dan** menulis catatan hasil pemeriksaan. Akibatnya waktu dokter banyak habis untuk menulis, bukan untuk pasien. Sebaliknya, pasien pulang hanya bermodal ingatan: obat apa yang harus diminum, bagaimana aturannya, dan kapan harus kontrol lagi — semua mudah terlupa begitu sampai di rumah.
+Dalam satu konsultasi di klinik atau puskesmas, dokter menjalankan dua pekerjaan dalam waktu yang bersamaan: mendengarkan dan memeriksa pasien, **serta** menulis catatan hasil pemeriksaan. Akibatnya, sebagian waktu dokter habis untuk menulis, bukan untuk pasien. Sebaliknya, pasien pulang hanya mengandalkan ingatan: obat apa yang harus diminum, bagaimana aturan pakainya, dan kapan harus kontrol kembali — semuanya mudah terlupakan setibanya di rumah.
 
-Tujuan kami membuat VeriScribe ada tiga, dan semuanya berangkat dari satu percakapan yang sama:
+Tujuan kami mengembangkan VeriScribe ada tiga, dan ketiganya berangkat dari satu percakapan yang sama:
 
-1. **Dokter bisa fokus ke pasien, bukan ke tulisan.** Urusan menulis catatan dibantu AI, jadi waktu konsultasi dipakai untuk berbicara dan memeriksa. Dokter tidak lagi menulis ulang hal yang sama berkali-kali.
-2. **Catatannya rapi dan bisa dipercaya.** Semua catatan memakai format yang sama, dan setiap isinya bisa dicek kembali ke ucapan aslinya di percakapan. AI tidak mengarang: kalau sesuatu tidak dibicarakan, bagian itu ditandai kosong, bukan diisi tebakan. Keputusan terakhir tetap di tangan dokter — catatan baru resmi setelah dokter menyetujuinya.
-3. **Pasien pulang membawa pegangan, bukan hanya ingatan.** Pasien menerima ringkasan dengan bahasa sehari-hari: obatnya apa, cara minumnya bagaimana, anjurannya apa, dan kapan kontrol lagi. Isinya sama persis dengan yang diputuskan dokter, karena ringkasan itu dibuat dari catatan yang sudah disetujui dokter — jadi kecil kemungkinan pasien salah ingat atau salah paham.
+1. **Dokter dapat berfokus pada pasien, bukan pada penulisan catatan.** Penulisan catatan dibantu AI, sehingga waktu konsultasi digunakan untuk berbicara dan memeriksa. Dokter tidak perlu lagi menulis ulang hal yang sama berulang kali.
+2. **Catatan yang dihasilkan rapi dan dapat dipercaya.** Seluruh catatan menggunakan format yang sama, dan setiap isinya dapat diperiksa kembali terhadap ucapan aslinya dalam percakapan. AI tidak mengarang: apabila sesuatu tidak dibicarakan, bagian tersebut ditandai sebagai kosong, bukan diisi dengan tebakan. Keputusan terakhir tetap berada di tangan dokter — catatan baru resmi setelah dokter mengesahkannya.
+3. **Pasien pulang dengan panduan yang jelas, bukan sekadar ingatan.** Pasien menerima ringkasan dalam bahasa sehari-hari: obat yang diberikan, cara meminumnya, anjuran yang perlu dijalankan, dan jadwal kontrol berikutnya. Isinya sama persis dengan yang diputuskan dokter, karena ringkasan tersebut dibuat dari catatan yang telah disahkan dokter — sehingga kemungkinan pasien salah ingat atau salah memahami instruksi menjadi jauh lebih kecil.
 
-Kalau tiga hal ini tercapai, yang terbantu bukan hanya dokter dan pasien: klinik juga mendapat catatan yang seragam dan rapi dari semua dokternya, tanpa menambah pekerjaan siapa pun. Itulah tujuan akhirnya — **satu konsultasi selesai, dua kebutuhan terpenuhi: dokter punya catatan yang sah, pasien punya panduan yang jelas.**
+Apabila ketiga hal ini tercapai, manfaatnya dirasakan tidak hanya oleh dokter dan pasien: fasilitas kesehatan juga memperoleh catatan yang seragam dan rapi dari seluruh dokternya, tanpa menambah beban pekerjaan siapa pun. Itulah tujuan akhirnya — **satu konsultasi selesai, dua kebutuhan terpenuhi: dokter memiliki catatan yang sah, pasien memiliki panduan yang jelas.**
 
-## Masalah yang diselesaikan
+## Masalah yang Diselesaikan
 
 Dua masalah muncul pada kejadian yang sama, yaitu konsultasi rawat jalan:
 
@@ -42,43 +42,43 @@ Dua masalah muncul pada kejadian yang sama, yaitu konsultasi rawat jalan:
 
 Rumusan masalahnya: *bagaimana membantu dokter mengubah percakapan konsultasi menjadi catatan klinis yang terstruktur dan mudah diperiksa, sekaligus menghasilkan instruksi tindak lanjut yang konsisten bagi pasien, tanpa mengambil alih keputusan dokter?*
 
-Pengguna hariannya adalah dokter rawat jalan; penerima ringkasannya pasien atau pendamping yang diberi izin; calon pembelinya fasilitas kesehatan.
+Pengguna utamanya adalah dokter rawat jalan; penerima ringkasannya adalah pasien atau pendamping yang diberi izin; calon pembelinya adalah fasilitas kesehatan.
 
-## Cara kerja
+## Cara Kerja
 
 1. **Rekam dengan persetujuan.** Percakapan dokter–pasien direkam setelah pasien menyetujui, lalu diubah menjadi transkrip.
 2. **Identitas dilindungi.** Transkrip melewati deidentifikasi PII sebelum diproses lebih lanjut.
 3. **AI menyusun draf SOAP.** Setiap butir catatan **ditautkan ke kutipan percakapan** sebagai sumbernya. Bagian yang tidak disebutkan, disangkal (negasi), atau ambigu **diberi tanda khusus**, sehingga ketiadaan data tidak terbaca sebagai hasil pemeriksaan normal.
 4. **Dokter memeriksa dan mengesahkan.** Dokter mengoreksi dan mengesahkan catatan sebelum disimpan ke sistem rekam medis fasilitas melalui jalur integrasi yang disepakati.
-5. **Ringkasan pasien dibuat dari catatan yang disahkan** — bukan dari transkrip — sehingga instruksi pasien tidak menyimpang dari keputusan klinis. Isinya instruksi obat, anjuran, dan jadwal kontrol yang memang diberikan. Bila catatan berubah, ringkasan diperbarui dan diperiksa ulang. Pengiriman lewat WhatsApp (dengan persetujuan pasien dan verifikasi penerima) adalah tahap pengembangan berikutnya; pada purwarupa ini pengirimannya disimulasikan.
+5. **Ringkasan pasien dibuat dari catatan yang disahkan** — bukan dari transkrip — sehingga instruksi pasien tidak menyimpang dari keputusan klinis. Isinya adalah instruksi obat, anjuran, dan jadwal kontrol yang memang diberikan. Apabila catatan berubah, ringkasan diperbarui dan diperiksa ulang. Pengiriman melalui WhatsApp (dengan persetujuan pasien dan verifikasi penerima) merupakan tahap pengembangan berikutnya; pada purwarupa ini pengirimannya disimulasikan.
 
 Alur inti backend: Audio → STT → Deidentifikasi PII → Auto-fill SOAP (dengan kutipan sumber + penanda ketidakpastian).
 
 ![Contoh ringkasan hasil konsultasi untuk pasien](docs/contoh-ringkasan-whatsapp.jpg)
 
-*Contoh tampilan ringkasan tindak lanjut pasien sebagaimana diterima lewat WhatsApp (simulasi purwarupa, data contoh).*
+*Contoh tampilan ringkasan tindak lanjut pasien sebagaimana diterima melalui WhatsApp (simulasi purwarupa, data contoh).*
 
 ## Keunggulan
 
-Transkripsi, draf SOAP, dan ringkasan pasien sudah ada pada berbagai produk. Keunggulan VeriScribe terletak pada rantai yang dijaga dari awal sampai akhir:
+Transkripsi, draf SOAP, dan ringkasan pasien telah tersedia pada berbagai produk. Keunggulan VeriScribe terletak pada rantai yang dijaga dari awal sampai akhir:
 
-- **Keterlacakan fakta.** Setiap fakta di catatan dapat dilacak kembali ke kutipan percakapannya; fakta tanpa sumber terlihat dan bisa dibuang dokter saat verifikasi.
-- **Negasi dan ketidakpastian ditandai, bukan ditebak.** Yang tidak disebutkan atau disangkal pasien tidak pernah ditulis seolah-olah temuan normal.
-- **Ringkasan pasien selalu konsisten.** Sumbernya satu-satunya adalah catatan yang sudah disahkan dokter, bukan transkrip mentah dan bukan karangan model.
-- **Kendali akhir pada dokter.** Tidak ada keluaran yang final atau terkirim sebelum disahkan.
-- **Provider-agnostik.** Backend berbicara lewat antarmuka OpenAI-compatible; ganti vendor LLM/STT cukup lewat env, tanpa mengubah kode, dan tanpa fallback tersembunyi.
+- **Keterlacakan fakta.** Setiap fakta dalam catatan dapat dilacak kembali ke kutipan percakapannya; fakta tanpa sumber terlihat jelas dan dapat dihapus oleh dokter saat verifikasi.
+- **Negasi dan ketidakpastian ditandai, bukan ditebak.** Hal yang tidak disebutkan atau disangkal pasien tidak pernah ditulis seolah-olah merupakan temuan normal.
+- **Ringkasan pasien selalu konsisten.** Satu-satunya sumber ringkasan adalah catatan yang telah disahkan dokter, bukan transkrip mentah dan bukan hasil karangan model.
+- **Kendali akhir berada pada dokter.** Tidak ada keluaran yang menjadi final atau terkirim sebelum disahkan.
+- **Provider-agnostik.** Backend berkomunikasi melalui antarmuka OpenAI-compatible; penggantian vendor LLM/STT cukup dilakukan melalui env, tanpa mengubah kode, dan tanpa fallback tersembunyi.
 
-## Status dan yang diukur
+## Status dan Indikator Pengukuran
 
 - **Konteks:** proyek lomba PLAY IT Hackathon DeepTech 2026 (PlayItPlus), kategori Digitalisasi AI Bidang Kesehatan.
-- **Kondisi demo saat ini:** seluruh alur berfungsi 100% bila API key LLM/STT terpasang; API key LLM pada demo publik sudah dicabut karena biaya, sehingga demo berjalan tanpa panggilan AI sungguhan sampai key dipasang kembali.
+- **Kondisi demo saat ini:** seluruh alur berfungsi 100% apabila API key LLM/STT terpasang; API key LLM pada demo publik telah dicabut karena biaya, sehingga demo berjalan tanpa panggilan AI yang sebenarnya sampai key dipasang kembali.
 - **Tingkat kesiapan teknologi:** TKT 2 menuju TKT 3. Konsep telah dirumuskan dan didukung literatur [1][2][3]; tahap berikutnya adalah pembuktian fungsi inti pada konsultasi simulasi.
-- **Batasan purwarupa:** satu alur konsultasi rawat jalan dan satu format catatan. Pengiriman WhatsApp masih simulasi.
+- **Batasan purwarupa:** satu alur konsultasi rawat jalan dan satu format catatan. Pengiriman WhatsApp masih berupa simulasi.
 - **Indikator pengujian:** waktu dokumentasi total (termasuk waktu koreksi draf), kelengkapan informasi, kesalahan pada negasi dan rincian obat, jumlah fakta tanpa sumber, konsistensi ringkasan terhadap catatan yang disahkan, dan kemampuan pasien mengulang instruksi.
-- **Target awal:** waktu dokumentasi total lebih rendah daripada pencatatan manual, dengan kesalahan klinis yang tidak meningkat. Manfaat ini adalah sasaran pengujian, bukan hasil yang sudah terbukti.
-- **Hilirisasi:** pilot di satu fasilitas layanan primer dengan satu alur rawat jalan, lalu diperluas ke fasilitas beralur serupa. Model bisnis yang dipertimbangkan: langganan per fasilitas atau per dokter. Dukungan mitra formal belum dimiliki pada tahap ini; kerja sama pilot terbuka.
+- **Target awal:** waktu dokumentasi total lebih rendah daripada pencatatan manual, dengan kesalahan klinis yang tidak meningkat. Manfaat ini merupakan sasaran pengujian, bukan hasil yang sudah terbukti.
+- **Hilirisasi:** pilot di satu fasilitas layanan primer dengan satu alur rawat jalan, lalu diperluas ke fasilitas lain yang memiliki alur serupa. Model bisnis yang dipertimbangkan: langganan per fasilitas atau per dokter. Dukungan mitra formal belum dimiliki pada tahap ini; kerja sama pilot terbuka.
 
-## Tim pelaksana
+## Tim Pelaksana
 
 | Nama | Peran |
 |---|---|
@@ -90,29 +90,29 @@ Transkripsi, draf SOAP, dan ringkasan pasien sudah ada pada berbagai produk. Keu
 ## Struktur
 
 - `frontend/` — Next.js 16 + React 19 + Tailwind v4 (port 3000)
-- `backend/` — Elysia + Bun (port 3001). Provider agnostik vendor via antarmuka OpenAI-compatible (`LLM_*` / `STT_*`), tanpa fallback tersembunyi
-- `docs/` — konsep proyek & jurnal riset, plus ilustrasi konsep (`konsep-dua-keluaran.png`) dan contoh ringkasan pasien (`contoh-ringkasan-whatsapp.jpg`)
+- `backend/` — Elysia + Bun (port 3001). Provider agnostik vendor melalui antarmuka OpenAI-compatible (`LLM_*` / `STT_*`), tanpa fallback tersembunyi
+- `docs/` — konsep proyek dan jurnal riset, serta ilustrasi konsep (`konsep-dua-keluaran.png`) dan contoh ringkasan pasien (`contoh-ringkasan-whatsapp.jpg`)
 
 ## Prasyarat
 
 - `bun@1.4.2`
 
-## Cara run
+## Cara Menjalankan
 
 ```bash
 # 1. Siapkan env backend
 cp backend/.env.example backend/.env
 
-# 2. Install dependency
+# 2. Pasang dependency
 bun install --cwd frontend
 bun install --cwd backend
 
-# 3. Jalan dev (dari root)
+# 3. Jalankan mode pengembangan (dari root)
 bun run:backend    # http://localhost:3001
 bun run:frontend   # http://localhost:3000
 ```
 
-Build / cek:
+Build dan pemeriksaan:
 
 ```bash
 bun build:backend
@@ -121,21 +121,21 @@ bun validate:lg        # validasi kelas Tailwind desktop (frontend)
 bun lint:frontend      # eslint frontend
 ```
 
-## Konfigurasi backend (`backend/.env`)
+## Konfigurasi Backend (`backend/.env`)
 
 | Key | Isi |
 |---|---|
-| `PORT`, `CORS_ORIGIN` | Wajib. Server gagal start kalau kosong/salah |
-| `LLM_PROVIDER`, `STT_PROVIDER` | Hanya `mock` atau `unified`. Typo langsung error saat boot |
+| `PORT`, `CORS_ORIGIN` | Wajib. Server gagal dijalankan apabila kosong atau salah |
+| `LLM_PROVIDER`, `STT_PROVIDER` | Hanya `mock` atau `unified`. Kesalahan penulisan langsung menyebabkan kegagalan saat server dinyalakan |
 | `LLM_*` / `STT_*` (`API_KEY`, `BASE_URL`, `MODEL`) | Wajib diisi saat mode `unified`. Contoh `BASE_URL`: OpenRouter `https://openrouter.ai/api/v1`, Groq `https://api.groq.com/openai/v1`, Ollama `http://localhost:11434/v1` |
 
-Mode `mock` untuk demo offline. Mode `unified` memanggil endpoint OpenAI-compatible sesuai `BASE_URL` — ganti vendor cukup ganti env, tanpa ubah kode.
+Mode `mock` digunakan untuk demo offline. Mode `unified` memanggil endpoint OpenAI-compatible sesuai `BASE_URL` — penggantian vendor cukup dilakukan melalui env, tanpa mengubah kode.
 
-## Endpoint backend
+## Endpoint Backend
 
-- `GET /` — info API
-- `GET /api/consultation/samples` — contoh transkrip untuk testing
-- `GET /api/consultation/status` — provider aktif (tanpa membocorkan key)
+- `GET /` — informasi API
+- `GET /api/consultation/samples` — contoh transkrip untuk pengujian
+- `GET /api/consultation/status` — provider aktif (tanpa menampilkan key)
 - `POST /api/consultation/stt` — `audio` (file) → transkrip
 - `POST /api/consultation/deidentify` — `text` → teks teranonimasi + entitas PII
 - `POST /api/consultation/autofill` — `text` → SOAP
