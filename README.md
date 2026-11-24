@@ -1,6 +1,6 @@
 # VeriScribe (PlayItPlus)
 
-**Asisten AI dokumentasi klinis berbasis audio dengan verifikasi dokter, dengan ringkasan pasien yang konsisten.**
+**Asisten AI dokumentasi klinis berbasis verifikasi dokter, dengan ringkasan pasien yang konsisten.**
 
 VeriScribe membantu dokter rawat jalan mengubah percakapan konsultasi menjadi dua keluaran yang tervalidasi dari satu proses:
 
@@ -11,7 +11,7 @@ Nama **VeriScribe** adalah judul proposal proyek ini; **PlayItPlus** adalah nama
 
 > Prinsip yang tidak berubah: **AI membantu dokumentasi. Keputusan klinis tetap pada dokter.** Sistem tidak menetapkan diagnosis, tidak meresepkan obat, dan tidak menggantikan keputusan dokter. Draf AI bersifat usulan — final hanya setelah dokter memeriksa, mengoreksi, dan mengesahkannya.
 
-![Satu konsultasi, dua keluaran tervalidasi](docs/assets/konsep-dua-keluaran.png)
+![Satu konsultasi, dua keluaran tervalidasi](docs/konsep-dua-keluaran.png)
 
 *Ilustrasi konsep: kondisi saat ini (kiri) dibanding alur yang ditawarkan VeriScribe (kanan).*
 
@@ -36,7 +36,7 @@ Pengguna hariannya adalah dokter rawat jalan; penerima ringkasannya pasien atau 
 
 Alur inti backend: Audio → STT → Deidentifikasi PII → Auto-fill SOAP (dengan kutipan sumber + penanda ketidakpastian).
 
-![Contoh ringkasan hasil konsultasi untuk pasien](docs/assets/contoh-ringkasan-whatsapp.jpg)
+![Contoh ringkasan hasil konsultasi untuk pasien](docs/contoh-ringkasan-whatsapp.jpg)
 
 *Contoh tampilan ringkasan tindak lanjut pasien sebagaimana diterima lewat WhatsApp (simulasi purwarupa, data contoh).*
 
@@ -71,7 +71,7 @@ Transkripsi, draf SOAP, dan ringkasan pasien sudah ada pada berbagai produk. Keu
 
 - `frontend/` — Next.js 16 + React 19 + Tailwind v4 (port 3000)
 - `backend/` — Elysia + Bun (port 3001). Provider agnostik vendor via antarmuka OpenAI-compatible (`LLM_*` / `STT_*`), tanpa fallback tersembunyi
-- `docs/` — konsep proyek & jurnal riset; `docs/assets/` — ilustrasi konsep dan contoh keluaran
+- `docs/` — konsep proyek & jurnal riset, plus ilustrasi konsep (`konsep-dua-keluaran.png`) dan contoh ringkasan pasien (`contoh-ringkasan-whatsapp.jpg`)
 
 ## Prasyarat
 
