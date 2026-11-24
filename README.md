@@ -5,7 +5,7 @@
 VeriScribe membantu dokter rawat jalan mengubah percakapan konsultasi menjadi dua keluaran yang tervalidasi dari satu proses:
 
 1. **Draf catatan klinis terstruktur (SOAP)** untuk tenaga kesehatan, dan
-2. **Ringkasan tindak lanjut berbahasa sederhana** untuk pasien.
+2. **Ringkasan tindak lanjut berbahasa sehari-hari** untuk pasien.
 
 Nama **VeriScribe** adalah judul proposal proyek ini; **PlayItPlus** adalah nama purwarupa yang berjalan (demo: https://playitplus.vercel.app/). Konsep lengkap ada di `docs/KONSEP_PROYEK.md`.
 
